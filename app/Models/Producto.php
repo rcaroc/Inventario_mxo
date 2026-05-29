@@ -11,9 +11,11 @@ class Producto extends Model
 
     protected $fillable = [
         'modelo_id',
-        'color',
-        'talla',
-        'stock'
+        'usuario_id',
+        'producto_nombre',
+        'producto_talla',
+        'producto_color',
+        'producto_proveedor' // Aunque sea opcional, debe estar aquí
     ];
 
     // Relación: Un producto pertenece a un modelo
