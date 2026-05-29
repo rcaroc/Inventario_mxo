@@ -2,28 +2,36 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Usuario;
+use App\Models\Usuario; // Importamos el modelo para conectar con Supabase
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Hash; // Para encriptar claves
 
 class UsuarioController extends Controller
 {
-    // 1. LISTAR USUARIOS
+    /**
+     * 1. LISTAR USUARIOS (index)
+     */
     public function index()
     {
-        $usuarios = Usuario::all(); 
+        // Traemos todos los usuarios de la tabla 'usuario'
+        $usuarios = Usuario::all();
         return view('usuarios.index', compact('usuarios'));
     }
 
-    // 2. MOSTRAR FORMULARIO DE CREACIÓN
+    /**
+     * 2. MOSTRAR FORMULARIO DE CREACIÓN (create)
+     */
     public function create()
     {
         return view('usuarios.create');
     }
 
-    // 3. GUARDAR NUEVO USUARIO
+    /**
+     * 3. GUARDAR NUEVO USUARIO (store)
+     */
     public function store(Request $request)
     {
+        // Validamos que los datos sean correctos
         $request->validate([
             'usuario_nombre'   => 'required|max:40',
             'usuario_apellido' => 'required|max:40',
@@ -32,18 +40,21 @@ class UsuarioController extends Controller
             'rol'              => 'required'
         ]);
 
+        // Creamos el registro en la base de datos
         Usuario::create([
             'usuario_nombre'   => $request->usuario_nombre,
             'usuario_apellido' => $request->usuario_apellido,
             'usuario_usuario'  => $request->usuario_usuario,
-            'usuario_clave'    => Hash::make($request->usuario_clave),
+            'usuario_clave'    => Hash::make($request->usuario_clave), // Clave encriptada
             'rol'              => $request->rol,
         ]);
 
         return redirect()->route('usuarios.index')->with('success', 'Usuario creado correctamente.');
     }
 
-    // 4. MOSTRAR FORMULARIO DE EDICIÓN
+    /**
+     * 4. MOSTRAR FORMULARIO DE EDICIÓN (edit)
+     */
     public function edit($id)
     {
         // Buscamos al usuario por su ID personalizado
@@ -51,11 +62,14 @@ class UsuarioController extends Controller
         return view('usuarios.edit', compact('usuario'));
     }
 
-    // 5. ACTUALIZAR DATOS
+    /**
+     * 5. ACTUALIZAR DATOS DEL USUARIO (update)
+     */
     public function update(Request $request, $id)
     {
         $usuario = Usuario::findOrFail($id);
 
+        // Validación: El campo unique ignora el ID actual para permitir guardar sin cambiar el nombre de usuario
         $request->validate([
             'usuario_nombre'   => 'required|max:40',
             'usuario_apellido' => 'required|max:40',
@@ -68,7 +82,7 @@ class UsuarioController extends Controller
         $usuario->usuario_usuario = $request->usuario_usuario;
         $usuario->rol = $request->rol;
 
-        // Solo actualiza la clave si el usuario escribió algo en ese campo
+        // Solo cambiamos la clave si el usuario escribió algo en el campo
         if ($request->filled('usuario_clave')) {
             $usuario->usuario_clave = Hash::make($request->usuario_clave);
         }
@@ -76,5 +90,22 @@ class UsuarioController extends Controller
         $usuario->save();
 
         return redirect()->route('usuarios.index')->with('success', 'Usuario actualizado con éxito.');
+    }
+
+    /**
+     * 6. ELIMINAR USUARIO (destroy)
+     */
+    public function destroy($id)
+    {
+        // Seguridad: No permitir borrar al administrador principal (ID 1)
+        if($id == 1) {
+            return redirect()->route('usuarios.index')->with('error', 'No se puede eliminar al administrador principal del sistema.');
+        }
+
+        $usuario = Usuario::findOrFail($id);
+        $usuario->delete();
+
+        // Enviamos la señal 'eliminar' con valor 'ok' para activar el mensaje azul en la vista
+        return redirect()->route('usuarios.index')->with('eliminar', 'ok');
     }
 }
