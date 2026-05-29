@@ -17,7 +17,12 @@ Route::prefix('usuarios')->group(function () {
     Route::get('/lista', [UsuarioController::class, 'index'])->name('usuarios.index');
     Route::get('/crear', [UsuarioController::class, 'create'])->name('usuarios.create');
     Route::post('/guardar', [UsuarioController::class, 'store'])->name('usuarios.store');
-});
+// Ruta para mostrar el formulario con los datos cargados
+    Route::get('/editar/{id}', [UsuarioController::class, 'edit'])->name('usuarios.edit');
+// Ruta para procesar el cambio en la base de datos
+    Route::put('/actualizar/{id}', [UsuarioController::class, 'update'])->name('usuarios.update');
+
+    });
 
 // --- CATÁLOGO (Modelos y Productos) ---
 Route::prefix('catalogo')->group(function () {
