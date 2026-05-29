@@ -29,31 +29,30 @@ class ProductoController extends Controller
     /**
      * Guarda las combinaciones masivas (Ruta: productos.store)
      */
-    public function store(Request $request)
-    {
-        $request->validate([
-            'modelo_id' => 'required',
-            'tallas' => 'required',
-            'colores' => 'required',
-        ]);
+public function store(Request $request)
+{
+    // 1. Obtener el nombre del modelo para armar el 'producto_nombre'
+    $modelo = \App\Models\Modelo::findOrFail($request->modelo_id);
 
-        // Procesar tallas y colores (separados por coma o línea)
-        $tallas = array_filter(array_map('trim', explode(',', str_replace("\n", ",", $request->tallas))));
-        $colores = array_filter(array_map('trim', explode(',', str_replace("\n", ",", $request->colores))));
+    // 2. Procesar tallas y colores desde el textarea
+    $tallas = array_filter(array_map('trim', explode(',', str_replace("\n", ",", $request->tallas))));
+    $colores = array_filter(array_map('trim', explode(',', str_replace("\n", ",", $request->colores))));
 
-        foreach ($colores as $color) {
-            foreach ($tallas as $talla) {
-                Producto::create([
-                    'modelo_id' => $request->modelo_id,
-                    'talla' => strtoupper($talla),
-                    'color' => strtolower($color),
-                    'stock' => 0
-                ]);
-            }
+    foreach ($colores as $color) {
+        foreach ($tallas as $talla) {
+            \App\Models\Producto::create([
+                'modelo_id'          => $request->modelo_id,
+                'usuario_id'         => auth()->id() ?? 1, // Asigna el usuario logueado o el ID 1 por defecto
+                'producto_nombre'    => $modelo->modelo_nombre . " - " . strtoupper($color) . " - " . strtoupper($talla),
+                'producto_talla'     => strtoupper($talla),
+                'producto_color'     => strtoupper($color),
+                'producto_proveedor' => null, // Omitimos proveedor como pediste
+            ]);
         }
-
-        return redirect()->route('productos.index')->with('success', '¡Productos creados exitosamente!');
     }
+
+    return redirect()->route('productos.index')->with('success', '¡Combinaciones creadas!');
+}
 
     /**
      * Elimina un producto (Ruta: productos.destroy)
