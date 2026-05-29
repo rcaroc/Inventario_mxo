@@ -11,66 +11,74 @@ use Illuminate\Support\Facades\Auth;
 
 class MovimientoController extends Controller
 {
-    /**
-     * Muestra el formulario para registrar una entrada (Movimientos -> Registrar entrada)
-     */
-    public function create()
+    // Muestra la vista de Entrada
+    public function createEntrada()
     {
-        // Traemos todos los modelos para el primer selector
         $modelos = Modelo::orderBy('modelo_nombre', 'asc')->get();
-        
         return view('movimientos.entrada', compact('modelos'));
     }
 
-    /**
-     * Retorna los productos de un modelo específico en formato JSON (Para el JS del select)
-     */
-    public function getProductosPorModelo($modelo_id)
+    // Muestra la vista de Salida
+    public function createSalida()
     {
-        $productos = Producto::where('modelo_id', $modelo_id)
-            ->select('producto_id', 'producto_nombre', 'producto_talla', 'producto_color')
-            ->orderBy('producto_talla', 'asc')
-            ->get();
-
-        return response()->json($productos);
+        $modelos = Modelo::orderBy('modelo_nombre', 'asc')->get();
+        return view('movimientos.salida', compact('modelos'));
     }
 
-    /**
-     * Guarda el movimiento de entrada y actualiza el stock del producto
-     */
-    public function store(Request $request)
+    // Procesa el guardado de Entrada
+    public function storeEntrada(Request $request)
     {
-        // Validar los datos recibidos
+        $this->registrar($request, 'entrada');
+        return redirect()->route('movimientos.entrada')->with('success', 'Entrada registrada con éxito.');
+    }
+
+    // Procesa el guardado de Salida
+    public function storeSalida(Request $request)
+    {
+        // Validación lógica: No sacar más de lo que existe
+        $producto = Producto::findOrFail($request->producto_id);
+        if ($producto->producto_stock < $request->cantidad) {
+            return redirect()->back()->with('error', 'Stock insuficiente. Disponible: ' . $producto->producto_stock);
+        }
+
+        $this->registrar($request, 'salida');
+        return redirect()->route('movimientos.salida')->with('success', 'Salida registrada con éxito.');
+    }
+
+    // Lógica común para ambos tipos
+    private function registrar(Request $request, $tipo)
+    {
         $request->validate([
             'producto_id' => 'required|exists:producto,producto_id',
             'cantidad'    => 'required|integer|min:1',
         ]);
 
-        try {
-            // Usamos una transacción para asegurar que si falla el stock, no se cree el movimiento (y viceversa)
-            DB::transaction(function () use ($request) {
-                
-                // 1. Crear el registro en la tabla 'movimiento'
-                Movimiento::create([
-                    'producto_id' => $request->producto_id,
-                    'usuario_id'  => Auth::id() ?? 1, // Usuario actual o ID 1 por defecto
-                    'tipo'        => 'entrada',
-                    'cantidad'    => $request->cantidad,
-                    'descripcion' => 'Entrada manual de inventario'
-                ]);
+        DB::transaction(function () use ($request, $tipo) {
+            Movimiento::create([
+                'producto_id' => $request->producto_id,
+                'usuario_id'  => Auth::id() ?? 1,
+                'tipo'        => $tipo,
+                'cantidad'    => $request->cantidad,
+                'descripcion' => $request->descripcion ?? ucfirst($tipo) . " manual de inventario",
+            ]);
 
-                // 2. Incrementar el stock en la tabla 'producto'
-                // Nota: Asegúrate de que tu columna en 'producto' se llama 'producto_stock'
-                $producto = Producto::findOrFail($request->producto_id);
+            $producto = Producto::findOrFail($request->producto_id);
+            if ($tipo == 'entrada') {
                 $producto->increment('producto_stock', $request->cantidad);
-            });
+            } else {
+                $producto->decrement('producto_stock', $request->cantidad);
+            }
+        });
+    }
 
-            return redirect()->route('movimientos.create')
-                             ->with('success', '¡Entrada registrada y stock actualizado correctamente!');
+    public function getProductosPorModelo($modelo_id)
+    {
+        return response()->json(Producto::where('modelo_id', $modelo_id)->get());
+    }
 
-        } catch (\Exception $e) {
-            return redirect()->back()
-                             ->with('error', 'Ocurrió un error al procesar la entrada: ' . $e->getMessage());
-        }
+    public function historial()
+    {
+        $movimientos = Movimiento::with(['producto', 'usuario'])->latest()->get();
+        return view('movimientos.historial', compact('movimientos'));
     }
 }
