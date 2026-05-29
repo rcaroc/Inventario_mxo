@@ -13,7 +13,7 @@
                 <table class="table table-hover align-middle mb-0">
                     <thead style="background-color: #f8f9fa;">
                         <tr>
-                            <th class="ps-4 py-3 fw-bold text-dark">Producto (Modelo)</th>
+                            <th class="ps-4 py-3 fw-bold text-dark">Producto </th>
                             <th class="py-3 fw-bold text-dark text-center">Talla</th>
                             <th class="py-3 fw-bold text-dark text-center">Color</th>
                             <th class="py-3 fw-bold text-dark text-center">Stock</th>
