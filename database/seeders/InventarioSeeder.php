@@ -6,6 +6,7 @@ use Illuminate\Database\Seeder;
 use App\Models\Usuario;
 use App\Models\Modelo;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 
 class InventarioSeeder extends Seeder
 {
@@ -14,35 +15,32 @@ class InventarioSeeder extends Seeder
      */
     public function run(): void
     {
-        // 1. Crear o Actualizar el Usuario Administrador
-        // Esto evita el error de "Unique violation" que viste en Render
-        Usuario::updateOrCreate(
-            ['usuario_usuario' => 'admin_ucv'], // Si encuentra este usuario...
-            [
-                'usuario_nombre' => 'Admin',
-                'usuario_apellido' => 'Sistema',
-                'usuario_clave' => Hash::make('admin123'), // Cambia 'admin123' por tu clave
-                'rol' => 'administrador'
-            ]
-        );
+        // 1. Limpiar los datos existentes en las tablas
+        // Desactivamos temporalmente las restricciones de llaves foráneas para poder vaciar
+        // En PostgreSQL (Supabase) se usa 'CASCADE' para limpiar tablas relacionadas
+        DB::statement('TRUNCATE TABLE usuario RESTART IDENTITY CASCADE');
+        DB::statement('TRUNCATE TABLE modelos RESTART IDENTITY CASCADE');
 
-        // 2. Crear o Actualizar Modelos de ejemplo (Basado en tu Balsamiq)
-        // Agregamos algunos para que tu tabla no aparezca vacía al iniciar
-        Modelo::updateOrCreate(
-            ['modelo_nombre' => 'Laptop HP ProBook'], 
-            ['modelo_marca' => 'HP']
-        );
+        // 2. Crear el Usuario Administrador (Ahora no dará error porque la tabla está vacía)
+        Usuario::create([
+            'usuario_nombre'   => 'Admin',
+            'usuario_apellido' => 'Sistema',
+            'usuario_usuario'  => 'admin_ucv',
+            'usuario_clave'    => Hash::make('admin123'),
+            'rol'              => 'administrador'
+        ]);
 
-        Modelo::updateOrCreate(
-            ['modelo_nombre' => 'Monitor Dell 24"'], 
-            ['modelo_marca' => 'Dell']
-        );
+        // 3. Crear Modelos de ejemplo para tu Catálogo
+        Modelo::create([
+            'modelo_nombre' => 'Laptop HP ProBook',
+            'modelo_marca'  => 'HP'
+        ]);
 
-        Modelo::updateOrCreate(
-            ['modelo_nombre' => 'Teclado Mecánico RGB'], 
-            ['modelo_marca' => 'Logitech']
-        );
+        Modelo::create([
+            'modelo_nombre' => 'Monitor Dell 24"',
+            'modelo_marca'  => 'Dell'
+        ]);
 
-        $this->command->info('Seeder ejecutado con éxito: Datos actualizados sin duplicados.');
+        $this->command->info('Tablas vaciadas y datos nuevos sembrados correctamente.');
     }
 }
