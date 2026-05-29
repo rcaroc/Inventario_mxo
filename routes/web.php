@@ -10,53 +10,30 @@ Route::get('/', function () {
 
 // --- MENÚ: USUARIO ---
 Route::prefix('usuarios')->group(function () {
-    // Opción: Lista de Usuarios
-    Route::get('/lista', function () {
-        $usuarios = DB::table('usuario')->get();
-        return view('usuarios.index', compact('usuarios'));
-    })->name('usuarios.index');
-
-    // Opción: Crear Usuario (Nuevo Usuario)
-    Route::get('/crear', function () {
-        return view('usuarios.create');
-    })->name('usuarios.create');
+    Route::get('/lista', function () { return view('usuarios.index'); })->name('usuarios.index');
+    Route::get('/crear', function () { return view('usuarios.create'); })->name('usuarios.create');
 });
 
 // --- MENÚ: CATÁLOGO ---
 Route::prefix('catalogo')->group(function () {
-    
-    // Opción: Lista de Modelos
-    Route::get('/modelos', function () {
-        $modelos = DB::table('modelo')->get();
-        return view('modelos.index', compact('modelos'));
-    })->name('modelos.index');
-
-    // Opción: Nuevo Modelo
-    Route::get('/modelos/nuevo', function () {
-        return view('modelos.create');
-    })->name('modelos.create');
-
-    // Opción: Lista de Productos
-    Route::get('/productos', function () {
-        $productos = DB::table('producto')->get();
-        return view('productos.index', compact('productos'));
-    })->name('productos.index');
-
-    // Opción: Nuevo Producto
-    Route::get('/productos/nuevo', function () {
-        return view('productos.create');
-    })->name('productos.create');
+    Route::get('/modelos', function () { return view('modelos.index'); })->name('modelos.index');
+    Route::get('/modelos/nuevo', function () { return view('modelos.create'); })->name('modelos.create');
+    Route::get('/productos', function () { return view('productos.index'); })->name('productos.index');
+    Route::get('/productos/nuevo', function () { return view('productos.create'); })->name('productos.create');
 });
 
 // --- MENÚ: MOVIMIENTO ---
-Route::get('/movimientos', function () {
-    return view('movimientos.index');
-})->name('movimientos.index');
+Route::prefix('movimientos')->group(function () {
+    Route::get('/entrada', function () { return view('movimientos.entrada'); })->name('movimientos.entrada');
+    Route::get('/salida', function () { return view('movimientos.salida'); })->name('movimientos.salida');
+    Route::get('/historial', function () { return view('movimientos.historial'); })->name('movimientos.historial');
+});
 
-// --- MENÚ: REPORTE ---
-Route::get('/reportes', function () {
-    return view('reportes.index');
-})->name('reportes.index');
+// --- MENÚ: REPORTES ---
+Route::prefix('reportes')->group(function () {
+    Route::get('/stock-modelo', function () { return view('reportes.stock_modelo'); })->name('reportes.modelo');
+    Route::get('/stock-talla-color', function () { return view('reportes.stock_talla'); })->name('reportes.talla');
+});
 
 // --- CIERRE DE SESIÓN ---
 Route::post('/logout', function () {
