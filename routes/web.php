@@ -28,7 +28,7 @@ Route::prefix('catalogo')->group(function () {
     Route::get('/modelos', [ModeloController::class, 'index'])->name('modelos.index');
     Route::get('/modelos/nuevo', [ModeloController::class, 'create'])->name('modelos.create');
     Route::post('/modelos/guardar', [ModeloController::class, 'store'])->name('modelos.store');
-
+    Route::delete('/modelos/{id}', [ModeloController::class, 'destroy'])->name('modelos.destroy');
     // Productos
     Route::get('/productos', [ProductoController::class, 'index'])->name('productos.index');
     Route::get('/productos/nuevo', [ProductoController::class, 'create'])->name('productos.create');
