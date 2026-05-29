@@ -3,48 +3,62 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
 
-// --- RUTA RAÍZ (DASHBOARD) ---
+// --- INICIO ---
 Route::get('/', function () {
     return view('inicio'); 
 })->name('home');
 
-// --- GRUPO USUARIOS (Con Lista y Nuevo) ---
+// --- MENÚ: USUARIO ---
 Route::prefix('usuarios')->group(function () {
-    
-    // Opción: Lista de usuarios
+    // Opción: Lista de Usuarios
     Route::get('/lista', function () {
         $usuarios = DB::table('usuario')->get();
-        return view('usuarios.index', ['usuarios' => $usuarios]);
+        return view('usuarios.index', compact('usuarios'));
     })->name('usuarios.index');
 
-    // Opción: Nuevo usuario
-    Route::get('/nuevo', function () {
+    // Opción: Crear Usuario (Nuevo Usuario)
+    Route::get('/crear', function () {
         return view('usuarios.create');
     })->name('usuarios.create');
-    
-    // Ruta para procesar el guardado del nuevo usuario
-    Route::post('/guardar', function () {
-        return "Procesando nuevo usuario...";
-    })->name('usuarios.store');
 });
 
-// --- GRUPO CATÁLOGO (MODELOS) ---
-Route::prefix('modelos')->group(function () {
-    Route::get('/', function () { 
+// --- MENÚ: CATÁLOGO ---
+Route::prefix('catalogo')->group(function () {
+    
+    // Opción: Lista de Modelos
+    Route::get('/modelos', function () {
         $modelos = DB::table('modelo')->get();
-        return view('modelos.index', compact('modelos')); 
+        return view('modelos.index', compact('modelos'));
     })->name('modelos.index');
-    
-    Route::get('/crear', function () { 
-        return view('modelos.create'); 
+
+    // Opción: Nuevo Modelo
+    Route::get('/modelos/nuevo', function () {
+        return view('modelos.create');
     })->name('modelos.create');
+
+    // Opción: Lista de Productos
+    Route::get('/productos', function () {
+        $productos = DB::table('producto')->get();
+        return view('productos.index', compact('productos'));
+    })->name('productos.index');
+
+    // Opción: Nuevo Producto
+    Route::get('/productos/nuevo', function () {
+        return view('productos.create');
+    })->name('productos.create');
 });
 
-// --- OTRAS RUTAS NECESARIAS ---
-Route::get('/movimientos', function () { return view('movimientos.index'); })->name('movimientos.index');
-Route::get('/reportes', function () { return view('reportes.index'); })->name('reportes.index');
+// --- MENÚ: MOVIMIENTO ---
+Route::get('/movimientos', function () {
+    return view('movimientos.index');
+})->name('movimientos.index');
 
-// --- CERRAR SESIÓN ---
+// --- MENÚ: REPORTE ---
+Route::get('/reportes', function () {
+    return view('reportes.index');
+})->name('reportes.index');
+
+// --- CIERRE DE SESIÓN ---
 Route::post('/logout', function () {
     return redirect('/');
 })->name('logout');
