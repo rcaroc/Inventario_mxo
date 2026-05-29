@@ -4,24 +4,18 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Usuario;
-use App\Models\Modelo;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class InventarioSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        // 1. Limpiar los datos existentes en las tablas
-        // Desactivamos temporalmente las restricciones de llaves foráneas para poder vaciar
-        // En PostgreSQL (Supabase) se usa 'CASCADE' para limpiar tablas relacionadas
+        // 1. Limpiar tabla de usuarios (esta sí sabemos que existe por el error anterior)
         DB::statement('TRUNCATE TABLE usuario RESTART IDENTITY CASCADE');
-        DB::statement('TRUNCATE TABLE modelos RESTART IDENTITY CASCADE');
 
-        // 2. Crear el Usuario Administrador (Ahora no dará error porque la tabla está vacía)
+        // 2. Crear el Usuario Administrador
         Usuario::create([
             'usuario_nombre'   => 'Admin',
             'usuario_apellido' => 'Sistema',
@@ -30,17 +24,20 @@ class InventarioSeeder extends Seeder
             'rol'              => 'administrador'
         ]);
 
-        // 3. Crear Modelos de ejemplo para tu Catálogo
-        Modelo::create([
-            'modelo_nombre' => 'Laptop HP ProBook',
-            'modelo_marca'  => 'HP'
-        ]);
+        // 3. Limpiar y sembrar tabla de modelos SOLO si existe
+        // Verificamos si se llama 'modelo' o 'modelos'
+        $tablaModelos = Schema::hasTable('modelo') ? 'modelo' : (Schema::hasTable('modelos') ? 'modelos' : null);
 
-        Modelo::create([
-            'modelo_nombre' => 'Monitor Dell 24"',
-            'modelo_marca'  => 'Dell'
-        ]);
+        if ($tablaModelos) {
+            DB::statement("TRUNCATE TABLE $tablaModelos RESTART IDENTITY CASCADE");
+            
+            // Insertar datos de prueba usando DB para evitar problemas de Modelos
+            DB::table($tablaModelos)->insert([
+                ['modelo_nombre' => 'Laptop HP ProBook', 'modelo_marca' => 'HP'],
+                ['modelo_nombre' => 'Monitor Dell 24"', 'modelo_marca' => 'Dell']
+            ]);
+        }
 
-        $this->command->info('Tablas vaciadas y datos nuevos sembrados correctamente.');
+        $this->command->info('¡Éxito! Datos limpiados y sembrados.');
     }
 }
