@@ -7,16 +7,23 @@ use Illuminate\Http\Request;
 
 class ModeloController extends Controller
 {
-    public function index(Request $request)
-    {
-        $query = $request->input('buscar');
-        $modelos = Modelo::when($query, function ($q) use ($query) {
-            return $q->where('modelo_nombre', 'LIKE', "%$query%")
-                     ->orWhere('modelo_ubicacion', 'LIKE', "%$query%");
-        })->get();
+        public function index(Request $request)
+        {
+            // Obtenemos el texto del input 'buscar'
+            $buscar = trim($request->get('buscar'));
 
-        return view('modelos.index', compact('modelos'));
-    }
+            if ($buscar) {
+                // Usamos ILIKE para que no importe mayúsculas/minúsculas
+                $modelos = Modelo::where('modelo_nombre', 'ILIKE', '%' . $buscar . '%')
+                                ->orWhere('modelo_ubicacion', 'ILIKE', '%' . $buscar . '%')
+                                ->get();
+            } else {
+                // Si no hay búsqueda, traemos todos
+                $modelos = Modelo::all();
+            }
+
+            return view('modelos.index', compact('modelos'));
+        }
 
     public function create()
     {
