@@ -29,7 +29,7 @@
                             <td class="ps-4 fw-bold text-muted">{{ $user->usuario_id }}</td>
                             
                             {{-- Nombres --}}
-                            <td class="fw-medium text-dark">{{ $user->usuario_nombre }}</td>
+                            <td class="text-dark">{{ $user->usuario_nombre }}</td>
                             
                             {{-- Apellidos --}}
                             <td class="text-dark">{{ $user->usuario_apellido }}</td>
