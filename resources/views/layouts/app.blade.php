@@ -50,6 +50,34 @@
             border: none;
             font-weight: 500;
         }
+
+        /* Estilos para las etiquetas de Rol */
+        .badge-admin {
+            background-color: #ef5350 !important; /* Rojo/Rosa */
+            color: white !important;
+            padding: 5px 12px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .badge-ventas {
+            background-color: #48c78e !important; /* Verde */
+            color: white !important;
+            padding: 5px 12px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .badge-inventario {
+            background-color: #ffd54f !important; /* Amarillo/Naranja claro */
+            color: #5d4037 !important; /* Texto oscuro para contraste */
+            padding: 5px 12px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
