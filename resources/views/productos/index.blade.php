@@ -47,7 +47,8 @@
                                 {{ $prod->producto_color }}
                             </td>
                             <td class="text-center">
-                                <span class="fw-bold">0</span> {{-- Stock fijo en 0 según tu lógica actual --}}
+                                {{-- Accedemos a la relación stock y mostramos la columna cantidad --}}
+                                <span class="fw-bold">{{ $prod->stock->cantidad ?? 0 }}</span>
                             </td>
                             <td class="text-center">
                                 <div class="d-flex justify-content-center">
