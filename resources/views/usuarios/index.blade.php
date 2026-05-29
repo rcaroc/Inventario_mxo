@@ -3,13 +3,10 @@
 @section('content')
 <div class="container mt-4">
     <div class="card shadow-sm border-0" style="border-radius: 12px;">
-        <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+        <div class="card-header bg-white border-bottom py-3">
             <h5 class="mb-0 fw-bold text-dark" style="letter-spacing: -0.5px;">
-                <i class="fas fa-users-cog me-2 text-secondary"></i>Gestión de Usuarios
+                <i class="fas fa-users me-2 text-secondary"></i>Lista de Usuarios
             </h5>
-            <a href="{{ route('usuarios.create') }}" class="btn btn-primary btn-sm px-3 shadow-sm" style="border-radius: 8px;">
-                <i class="fas fa-plus me-1"></i> Nuevo Usuario
-            </a>
         </div>
 
         <div class="card-body p-0">
@@ -35,7 +32,7 @@
                                 <span class="text-primary fw-bold">@</span>{{ $user->usuario_usuario }}
                             </td>
                             <td>
-                                {{-- Lógica de Badges por Rol --}}
+                                {{-- Lógica de Badges por Rol con colores específicos --}}
                                 @php
                                     $rolLower = strtolower($user->rol);
                                     $badgeColor = match($rolLower) {
@@ -45,13 +42,13 @@
                                         default         => 'background-color: #6c757d; color: white;'
                                     };
                                 @endphp
-                                <span class="badge shadow-sm px-3 py-2" style="{{ $badgeColor }} border-radius: 6px; font-size: 0.75rem;">
+                                <span class="badge shadow-sm px-3 py-2" style="{{ $badgeColor }} border-radius: 6px; font-size: 0.75rem; min-width: 100px;">
                                     {{ strtoupper($user->rol) }}
                                 </span>
                             </td>
                             <td class="text-center">
-                                {{-- Bloqueo para Usuario Principal (Asumiendo que ID 1 es el principal) --}}
-                                @if($user->usuario_id == 1 || $user->rol == 'administrador')
+                                {{-- Bloqueo para Usuario Principal o Rol Administrador --}}
+                                @if($user->usuario_id == 1 || $rolLower == 'administrador')
                                     <span class="badge bg-light text-secondary border px-3 py-2" style="border-radius: 6px;">
                                         <i class="fas fa-lock me-1"></i> Usuario actual
                                     </span>
@@ -76,7 +73,6 @@
                         @empty
                         <tr>
                             <td colspan="6" class="text-center py-5 text-muted">
-                                <img src="https://cdn-icons-png.flaticon.com/512/5089/5089731.png" width="80" class="mb-3 opacity-50">
                                 <p class="mb-0">No hay usuarios registrados en el sistema.</p>
                             </td>
                         </tr>
@@ -92,16 +88,19 @@
 </div>
 
 <style>
-    /* Estilos adicionales para mejorar el padding y visual */
+    /* Espaciado generoso en las celdas */
     .table td, .table th {
-        padding: 1rem 0.75rem;
+        padding: 1.2rem 0.75rem;
     }
+    /* Efecto sutil al pasar el mouse */
     .table tbody tr:hover {
-        background-color: #fcfcfc;
+        background-color: #fafafa;
         transition: background-color 0.2s ease;
     }
-    .btn-sm {
-        font-size: 0.8rem;
+    /* Bordes redondeados sutiles para los badges */
+    .badge {
+        font-weight: 600;
+        letter-spacing: 0.3px;
     }
 </style>
 @endsection
