@@ -74,8 +74,12 @@ class MovimientoController extends Controller
 
     public function getProductosPorModelo($modelo_id)
     {
-        // Retornamos los productos del modelo
-        return response()->json(Producto::where('modelo_id', $modelo_id)->get());
+        // Cargamos el producto con su stock para mostrarlo en el banner azul
+        $productos = Producto::with('stock')
+            ->where('modelo_id', $modelo_id)
+            ->get();
+
+        return response()->json($productos);
     }
 
     public function historial()
@@ -83,4 +87,6 @@ class MovimientoController extends Controller
         $movimientos = Movimiento::with(['producto', 'usuario'])->latest()->get();
         return view('movimientos.historial', compact('movimientos'));
     }
+
+
 }
