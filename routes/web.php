@@ -10,7 +10,7 @@ Route::get('/', function () {
         $dbStatus = "✅ Conexión a Supabase Exitosa";
 
         // 2. Intentar leer una tabla real (CAMBIA 'productos' POR TU TABLA)
-        $tabla = 'productos'; 
+        $tabla = 'public.productos'; 
         $cantidad = DB::table($tabla)->count();
         $datosStatus = "📊 La tabla '$tabla' tiene $cantidad registros.";
 
