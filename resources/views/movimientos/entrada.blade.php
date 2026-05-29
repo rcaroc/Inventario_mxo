@@ -13,7 +13,7 @@
         </div>
     @endif
 
-    <form action="{{ route('movimientos.store') }}" method="POST">
+    <form action="{{ route('movimientos.storeEntrada') }}" method="POST">
         @csrf
         <div class="row g-3">
             {{-- Selector de Modelo --}}
