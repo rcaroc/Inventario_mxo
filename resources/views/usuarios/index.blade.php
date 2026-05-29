@@ -30,7 +30,9 @@
                             <td class="fw-medium text-dark">{{ $user->usuario_nombre }}</td>
                             <td class="text-dark">{{ $user->usuario_apellido }}</td>
                             <td>
-                                <span class="text-primary fw-bold">@</span>{{ $user->usuario_usuario }}
+                                <td>
+    <span class="text-dark">{{ $user->usuario_usuario }}</span>
+</td>
                             </td>
                             <td>
                                 @php
