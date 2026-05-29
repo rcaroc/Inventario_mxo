@@ -8,7 +8,7 @@ Route::get('/', function () {
     // Intentamos obtener los productos para pasarlos a la vista
     $productos = DB::table('producto')->get();
     
-    return view('welcome', ['productos' => $productos]);
+    return view('inicio', ['productos' => $productos]);
 });
 
 // Puedes mantener esta ruta solo para pruebas rápidas si quieres
