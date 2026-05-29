@@ -11,7 +11,6 @@
 
         <div class="card-body p-0">
             <div class="table-responsive">
-                {{-- AQUÍ EMPIEZA LA TABLA --}}
                 <table class="table table-hover align-middle mb-0">
                     <thead style="background-color: #f8f9fa;">
                         <tr>
@@ -26,40 +25,48 @@
                     <tbody>
                         @forelse($usuarios as $user)
                         <tr class="border-bottom">
+                            {{-- ID --}}
                             <td class="ps-4 fw-bold text-muted">{{ $user->usuario_id }}</td>
+                            
+                            {{-- Nombres --}}
                             <td class="fw-medium text-dark">{{ $user->usuario_nombre }}</td>
+                            
+                            {{-- Apellidos --}}
                             <td class="text-dark">{{ $user->usuario_apellido }}</td>
-                            <td>
-                                <td>
-    <span class="text-dark">{{ $user->usuario_usuario }}</span>
-</td>
-                            </td>
+                            
+                            {{-- Usuario (SIN EL @) --}}
+                            <td class="text-dark fw-bold">{{ $user->usuario_usuario }}</td>
+                            
+                            {{-- Rol con Badges de colores --}}
                             <td>
                                 @php
                                     $rolLower = strtolower($user->rol);
                                     $badgeColor = match($rolLower) {
-                                        'administrador' => 'background-color: #dc3545; color: white;',
-                                        'inventario'    => 'background-color: #ffc107; color: #000;',
-                                        'ventas'        => 'background-color: #198754; color: white;',
+                                        'administrador' => 'background-color: #dc3545; color: white;', // Rojo
+                                        'inventario'    => 'background-color: #ffc107; color: #000;',   // Amarillo
+                                        'ventas'        => 'background-color: #198754; color: white;', // Verde
                                         default         => 'background-color: #6c757d; color: white;'
                                     };
                                 @endphp
-                                <span class="badge shadow-sm px-3 py-2" style="{{ $badgeColor }} border-radius: 6px; font-size: 0.75rem; min-width: 100px;">
+                                <span class="badge shadow-sm px-3 py-2" style="{{ $badgeColor }} border-radius: 6px; font-size: 0.75rem; min-width: 110px;">
                                     {{ strtoupper($user->rol) }}
                                 </span>
                             </td>
+
+                            {{-- Opciones --}}
                             <td class="text-center">
-                                {{-- Bloqueo de seguridad para el ID 1 o rol administrador --}}
                                 @if($user->usuario_id == 1 || $rolLower == 'administrador')
                                     <span class="badge bg-light text-secondary border px-3 py-2" style="border-radius: 6px;">
                                         <i class="fas fa-lock me-1"></i> Usuario actual
                                     </span>
                                 @else
                                     <div class="d-flex justify-content-center gap-2">
-                                        <a href="#" class="btn btn-sm btn-light border shadow-sm">
+                                        {{-- Boton Editar --}}
+                                        <a href="#" class="btn btn-sm btn-light border shadow-sm px-3">
                                             <i class="fas fa-edit text-dark"></i>
                                         </a>
-                                        <form action="#" method="POST" onsubmit="return confirm('¿Eliminar usuario?')">
+                                        {{-- Boton Eliminar Rojo Sólido --}}
+                                        <form action="#" method="POST" onsubmit="return confirm('¿Deseas eliminar este usuario?')">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-sm btn-danger shadow-sm px-3">
@@ -73,7 +80,7 @@
                         @empty
                         <tr>
                             <td colspan="6" class="text-center py-5 text-muted">
-                                No hay usuarios registrados.
+                                No se encontraron registros.
                             </td>
                         </tr>
                         @endforelse
@@ -83,13 +90,23 @@
         </div>
         
         <div class="card-footer bg-white border-top-0 py-3">
-            <p class="small text-muted mb-0">Total: <strong>{{ count($usuarios) }}</strong> usuarios.</p>
+            <p class="small text-muted mb-0">Total: <strong>{{ count($usuarios) }}</strong> registrados.</p>
         </div>
     </div>
 </div>
 
 <style>
-    .table td, .table th { padding: 1.2rem 0.75rem; }
-    .table tbody tr:hover { background-color: #fafafa; }
+    /* Estilos para el padding y visualización */
+    .table td, .table th {
+        padding: 1.2rem 0.75rem;
+    }
+    .table tbody tr:hover {
+        background-color: #fafafa;
+        transition: 0.2s;
+    }
+    .badge {
+        font-weight: 600;
+        letter-spacing: 0.2px;
+    }
 </style>
 @endsection
