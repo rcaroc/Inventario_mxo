@@ -8,7 +8,7 @@
     </div>
 
     @if(session('success'))
-        <div class="alert alert-success border-0 shadow-sm mb-4" style="border-radius: 10px;">
+        <div class="alert alert-success border-0 shadow-sm mb-4">
             {{ session('success') }}
         </div>
     @endif
@@ -16,10 +16,10 @@
     <form action="{{ route('movimientos.storeEntrada') }}" method="POST">
         @csrf
         <div class="row g-3">
-            {{-- Selector de Modelo --}}
+            {{-- Modelo --}}
             <div class="col-md-5">
                 <label class="form-label fw-bold">Modelo</label>
-                <select id="select-modelo" class="form-select border-1 py-2">
+                <select id="select-modelo" class="form-select py-2">
                     <option value="" selected disabled>Seleccione un modelo...</option>
                     @foreach($modelos as $m)
                         <option value="{{ $m->modelo_id }}">{{ $m->modelo_nombre }}</option>
@@ -27,31 +27,45 @@
                 </select>
             </div>
 
-            {{-- Selector de Producto (Variante) --}}
+            {{-- Producto --}}
             <div class="col-md-7">
                 <label class="form-label fw-bold">Producto (variante)</label>
-                <select name="producto_id" id="select-producto" class="form-select border-1 py-2" disabled required>
+                <select name="producto_id" id="select-producto" class="form-select py-2" disabled required>
                     <option value="" selected disabled>Seleccione un producto...</option>
                 </select>
                 <small class="text-muted">Un producto representa una variante (Color/Talla) dentro del modelo seleccionado.</small>
             </div>
         </div>
 
-        {{-- Cantidad y Botón --}}
-        <div class="row mt-4 align-items-end">
-            <div class="col-md-3">
-                <label class="form-label fw-bold">Cantidad a ingresar</label>
-                <input type="number" name="cantidad" class="form-control py-2" min="1" placeholder="0" required>
-            </div>
-            <div class="col-md-4">
-                <button type="submit" class="btn btn-primary px-5 py-2 w-100" style="background-color: #3498db; border: none; border-radius: 30px;">
-                    Registrar entrada
-                </button>
+        {{-- Banner de Stock Actual (Dinámico) --}}
+        <div class="row mt-3">
+            <div class="col-12">
+                <div id="stock-banner" class="alert alert-info border-0 py-3 d-none" style="background-color: #f0f4ff; color: #3056d3;">
+                    <span class="fw-bold">Stock actual del producto: </span>
+                    <span id="stock-count">0</span>
+                </div>
             </div>
         </div>
 
-        <div id="info-box" class="mt-4 p-4 text-center" style="background-color: #f8f9fa; border-radius: 8px; color: #6c757d; border: 1px dashed #dee2e6;">
-            Seleccione un <strong>modelo</strong> y luego un <strong>producto</strong> para registrar la entrada.
+        {{-- Cantidad y Descripción --}}
+        <div class="row mt-3 g-3">
+            <div class="col-md-4">
+                <label class="form-label fw-bold">Cantidad (unidades)</label>
+                <input type="number" name="cantidad" class="form-control py-2" min="1" placeholder="Ej: 10" required>
+            </div>
+            <div class="col-md-8">
+                <label class="form-label fw-bold">Descripción (opcional)</label>
+                <input type="text" name="descripcion" class="form-control py-2" placeholder="Ej: Compra a proveedor, corrección de inventario, etc.">
+            </div>
+        </div>
+
+        {{-- Botón Registrar --}}
+        <div class="row mt-4">
+            <div class="col-12 text-center">
+                <button type="submit" class="btn btn-success px-5 py-2" style="background-color: #48bb78; border: none; border-radius: 30px;">
+                    Registrar entrada
+                </button>
+            </div>
         </div>
     </form>
 </div>
@@ -60,10 +74,10 @@
 document.getElementById('select-modelo').addEventListener('change', function() {
     const modeloId = this.value;
     const selectProducto = document.getElementById('select-producto');
-    const infoBox = document.getElementById('info-box');
+    const stockBanner = document.getElementById('stock-banner');
     
     selectProducto.disabled = true;
-    selectProducto.innerHTML = '<option>Cargando...</option>';
+    stockBanner.classList.add('d-none');
 
     fetch(`/api/productos-por-modelo/${modeloId}`)
         .then(response => response.json())
@@ -72,13 +86,23 @@ document.getElementById('select-modelo').addEventListener('change', function() {
             data.forEach(prod => {
                 const option = document.createElement('option');
                 option.value = prod.producto_id;
-                // Usamos los nombres de tu migración anterior: producto_talla y producto_color
-                option.textContent = `${prod.producto_talla} / ${prod.producto_color}`;
+                // Guardamos el stock en un atributo data para usarlo luego
+                option.dataset.stock = prod.stock ? prod.stock.cantidad : 0;
+                option.textContent = `${prod.producto_nombre}`;
                 selectProducto.appendChild(option);
             });
             selectProducto.disabled = false;
-            infoBox.classList.add('d-none');
         });
+});
+
+// Mostrar el stock actual al cambiar de producto
+document.getElementById('select-producto').addEventListener('change', function() {
+    const selectedOption = this.options[this.selectedIndex];
+    const stockCount = document.getElementById('stock-count');
+    const stockBanner = document.getElementById('stock-banner');
+
+    stockCount.textContent = selectedOption.dataset.stock;
+    stockBanner.classList.remove('d-none');
 });
 </script>
 @endsection
