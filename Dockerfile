@@ -28,5 +28,6 @@ RUN mkdir -p /var/www/html/storage/framework/cache/data \
     && mkdir -p /var/www/html/storage/logs \
     && chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache \
     && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+RUN php artisan config:clear && php artisan route:clear && php artisan view:clear
 
 EXPOSE 80
