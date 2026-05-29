@@ -23,4 +23,10 @@ class Producto extends Model
     {
         return $this->belongsTo(Modelo::class, 'modelo_id', 'modelo_id');
     }
+
+        public function stock()
+    {
+        // Un producto tiene un registro de stock
+        return $this->hasOne(Stock::class, 'producto_id');
+    }
 }
