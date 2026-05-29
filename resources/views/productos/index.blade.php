@@ -7,10 +7,7 @@
             <h1 class="fw-bold text-dark mb-0">Productos</h1>
             <p class="text-muted">Lista de productos registrados</p>
         </div>
-        {{-- Botón para ir a crear nuevo --}}
-        <a href="{{ route('productos.create') }}" class="btn btn-primary px-4" style="background-color: #3498db; border: none; border-radius: 8px;">
-            + Nuevo Producto
-        </a>
+        {{-- Botón "Nuevo Producto" eliminado de aquí según tu solicitud --}}
     </div>
 
     {{-- Alertas --}}
@@ -18,6 +15,13 @@
         <div class="alert alert-primary border-0 shadow-sm mb-4" style="background-color: #f0f7ff; border-radius: 8px; padding: 20px; border-left: 5px solid #0056b3 !important;">
             <h5 class="fw-bold mb-1" style="color: #0056b3;">¡LOGRADO!</h5>
             <p class="mb-0" style="color: #0056b3;">{{ session('success') }}</p>
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="alert alert-danger border-0 shadow-sm mb-4" style="border-radius: 8px; padding: 20px;">
+            <h5 class="fw-bold mb-1">ERROR</h5>
+            <p class="mb-0">{{ session('error') }}</p>
         </div>
     @endif
 
@@ -47,18 +51,29 @@
                                 {{ $prod->producto_color }}
                             </td>
                             <td class="text-center">
-                                {{-- Accedemos a la relación stock y mostramos la columna cantidad --}}
-                                <span class="fw-bold">{{ $prod->stock->cantidad ?? 0 }}</span>
+                                {{-- Mostramos el stock real desde la tabla relacionada --}}
+                                <span class="fw-bold {{ ($prod->stock->cantidad ?? 0) > 0 ? 'text-primary' : '' }}">
+                                    {{ $prod->stock->cantidad ?? 0 }}
+                                </span>
                             </td>
                             <td class="text-center">
                                 <div class="d-flex justify-content-center">
-                                    <form id="form-eliminar-{{ $prod->producto_id }}" action="{{ route('productos.destroy', $prod->producto_id) }}" method="POST">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="button" class="btn-eliminar-custom" onclick="confirmarEliminar({{ $prod->producto_id }})">
-                                            Eliminar
+                                    {{-- LÓGICA: Si tiene stock > 0, el botón se desactiva --}}
+                                    @if(($prod->stock->cantidad ?? 0) > 0)
+                                        <button type="button" class="btn-eliminar-custom disabled" 
+                                                style="opacity: 0.5; cursor: not-allowed; filter: grayscale(1);" 
+                                                title="No se puede eliminar un producto con stock" disabled>
+                                            Bloqueado
                                         </button>
-                                    </form>
+                                    @else
+                                        <form id="form-eliminar-{{ $prod->producto_id }}" action="{{ route('productos.destroy', $prod->producto_id) }}" method="POST">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="button" class="btn-eliminar-custom" onclick="confirmarEliminar({{ $prod->producto_id }})">
+                                                Eliminar
+                                            </button>
+                                        </form>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
@@ -78,7 +93,7 @@
 function confirmarEliminar(id) {
     Swal.fire({
         title: '¿Estás seguro?',
-        text: "Se eliminará este producto permanentemente.",
+        text: "Esta acción no se puede deshacer.",
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#ef5350',
