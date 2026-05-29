@@ -7,11 +7,18 @@
         <p class="text-muted">Gestión de accesos al sistema</p>
     </div>
 
-    {{-- Alertas --}}
+    {{-- Alertas de Éxito --}}
+    @if(session('eliminar') == 'ok')
+        <div class="alert alert-primary border-0 shadow-sm mb-4" style="background-color: #f0f7ff; border-radius: 8px; padding: 20px; border-left: 5px solid #0056b3 !important;">
+            <h5 class="fw-bold mb-1" style="color: #0056b3;">¡USUARIO ELIMINADO!</h5>
+            <p class="mb-0" style="color: #0056b3;">El usuario ha sido removido del sistema con éxito.</p>
+        </div>
+    @endif
+
     @if(session('actualizado') == 'ok')
         <div class="alert alert-primary border-0 shadow-sm mb-4" style="background-color: #f0f7ff; border-radius: 8px; padding: 20px; border-left: 5px solid #0056b3 !important;">
             <h5 class="fw-bold mb-1" style="color: #0056b3;">¡USUARIO ACTUALIZADO!</h5>
-            <p class="mb-0" style="color: #0056b3;">Los datos se guardaron correctamente.</p>
+            <p class="mb-0" style="color: #0056b3;">Los cambios se guardaron correctamente.</p>
         </div>
     @endif
 
@@ -23,7 +30,7 @@
                         <tr>
                             <th class="ps-4 py-3 fw-bold text-dark">Nombre Completo</th>
                             <th class="py-3 fw-bold text-dark">Usuario</th>
-                            <th class="py-3 fw-bold text-dark">Rol</th>
+                            <th class="py-3 fw-bold text-dark text-center">Rol</th>
                             <th class="py-3 fw-bold text-dark text-center">Acciones</th>
                         </tr>
                     </thead>
@@ -34,26 +41,35 @@
                                 <span class="fw-bold text-dark">{{ $user->usuario_nombre }} {{ $user->usuario_apellido }}</span>
                             </td>
                             <td class="text-muted">{{ $user->usuario_usuario }}</td>
-                            <td>
-                                <span class="badge bg-light text-dark border px-3 text-capitalize">
-                                    {{ $user->rol }}
-                                </span>
+                            
+                            {{-- COLUMNA DE ROL CON COLORES E IMAGEN --}}
+                            <td class="text-center">
+                                @if($user->rol == 'administrador')
+                                    <span class="badge-admin">Administrador</span>
+                                @elseif($user->rol == 'ventas')
+                                    <span class="badge-ventas">Encargado de Ventas</span>
+                                @elseif($user->rol == 'inventario')
+                                    <span class="badge-inventario">Encargado de Inventario</span>
+                                @else
+                                    <span class="badge bg-light text-dark border">{{ $user->rol }}</span>
+                                @endif
                             </td>
+
                             <td class="text-center">
                                 <div class="d-flex justify-content-center gap-2">
                                     
-                                    {{-- BOTÓN EDITAR (Usando usuario_id) --}}
+                                    {{-- BOTÓN EDITAR (ESTILO IMAGEN) --}}
                                     <a href="{{ route('usuarios.edit', $user->usuario_id) }}" class="btn-editar-custom">
                                         Editar
                                     </a>
                                     
-                                    {{-- FORMULARIO ELIMINAR --}}
+                                    {{-- FORMULARIO OCULTO PARA ELIMINAR --}}
                                     <form id="form-eliminar-{{ $user->usuario_id }}" action="{{ route('usuarios.destroy', $user->usuario_id) }}" method="POST" style="display: none;">
                                         @csrf
                                         @method('DELETE')
                                     </form>
 
-                                    {{-- BOTÓN ELIMINAR (Usando usuario_id) --}}
+                                    {{-- BOTÓN ELIMINAR (ESTILO IMAGEN) --}}
                                     <button type="button" class="btn-eliminar-custom" onclick="confirmarEliminar({{ $user->usuario_id }})">
                                         Eliminar
                                     </button>
@@ -77,7 +93,7 @@
 function confirmarEliminar(id) {
     Swal.fire({
         title: '¿Estás seguro?',
-        text: "Se eliminará este usuario permanentemente.",
+        text: "Esta acción no se puede deshacer.",
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#ef5350',
