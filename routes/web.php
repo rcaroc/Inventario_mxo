@@ -43,10 +43,18 @@ Route::prefix('catalogo')->group(function () {
 
 // --- MOVIMIENTOS ---
 Route::prefix('movimientos')->group(function () {
-    Route::get('/entrada', [MovimientoController::class, 'entrada'])->name('movimientos.entrada');
-    Route::get('/salida', [MovimientoController::class, 'salida'])->name('movimientos.salida');
+    // Entradas
+    Route::get('/entrada', [MovimientoController::class, 'createEntrada'])->name('movimientos.entrada');
+    Route::post('/entrada/guardar', [MovimientoController::class, 'storeEntrada'])->name('movimientos.storeEntrada');
+    // Salidas
+    Route::get('/salida', [MovimientoController::class, 'createSalida'])->name('movimientos.salida');
+    Route::post('/salida/guardar', [MovimientoController::class, 'storeSalida'])->name('movimientos.storeSalida');
+    // Historial
     Route::get('/historial', [MovimientoController::class, 'historial'])->name('movimientos.historial');
 });
+
+// API para cargar productos dinámicamente (se usa tanto en entrada como en salida)
+Route::get('/api/productos-por-modelo/{modelo_id}', [MovimientoController::class, 'getProductosPorModelo']);
 
 // --- REPORTES ---
 Route::prefix('reportes')->group(function () {
