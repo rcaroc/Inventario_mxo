@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Modelo;
 use App\Models\Producto;
 use App\Models\Movimiento;
-use App\Models\Stock; // Importamos el modelo Stock
+use App\Models\Stock;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -32,11 +32,10 @@ class MovimientoController extends Controller
 
     public function storeSalida(Request $request)
     {
-        // Validación: Buscar el stock en la tabla 'stock'
         $stock = Stock::where('producto_id', $request->producto_id)->first();
         
         if (!$stock || $stock->cantidad < $request->cantidad) {
-            return redirect()->back()->with('error', 'Stock insuficiente. Disponible: ' . ($stock->cantidad ?? 0));
+            return redirect()->back()->with('error', '¡Atención! El stock cambió mientras realizabas la operación.');
         }
 
         $this->registrar($request, 'salida');
@@ -51,7 +50,6 @@ class MovimientoController extends Controller
         ]);
 
         DB::transaction(function () use ($request, $tipo) {
-            // 1. Crear el movimiento
             Movimiento::create([
                 'producto_id' => $request->producto_id,
                 'usuario_id'  => Auth::id() ?? 1,
@@ -60,10 +58,7 @@ class MovimientoController extends Controller
                 'descripcion' => $request->descripcion ?? ucfirst($tipo) . " manual de inventario",
             ]);
 
-            // 2. ACTUALIZAR EN LA TABLA 'stock' (No en 'producto')
-            // Buscamos el registro por producto_id
             $registroStock = Stock::where('producto_id', $request->producto_id)->first();
-
             if ($tipo == 'entrada') {
                 $registroStock->increment('cantidad', $request->cantidad);
             } else {
@@ -72,21 +67,26 @@ class MovimientoController extends Controller
         });
     }
 
-    public function getProductosPorModelo($modelo_id)
+    /**
+     * API para cargar productos. 
+     * Se puede pasar un parámetro ?con_stock=1 para filtrar solo los que tienen cantidad > 0
+     */
+    public function getProductosPorModelo(Request $request, $modelo_id)
     {
-        // Cargamos el producto con su stock para mostrarlo en el banner azul
-        $productos = Producto::with('stock')
-            ->where('modelo_id', $modelo_id)
-            ->get();
+        $query = Producto::with('stock')->where('modelo_id', $modelo_id);
 
-        return response()->json($productos);
+        if ($request->has('con_stock')) {
+            $query->whereHas('stock', function($q) {
+                $q->where('cantidad', '>', 0);
+            });
+        }
+
+        return response()->json($query->get());
     }
 
     public function historial()
     {
-        $movimientos = Movimiento::with(['producto', 'usuario'])->latest()->get();
+        $movimientos = Movimiento::with(['producto.modelo', 'usuario'])->latest()->get();
         return view('movimientos.historial', compact('movimientos'));
     }
-
-
 }
