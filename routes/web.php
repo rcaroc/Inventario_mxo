@@ -3,28 +3,15 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
 
+// Esta será la ruta principal que cargará tu diseño
 Route::get('/', function () {
-    try {
-        // 1. Verificar conexión
-        DB::connection()->getPdo();
-        $dbStatus = "✅ Conexión a Supabase Exitosa";
+    // Intentamos obtener los productos para pasarlos a la vista
+    $productos = DB::table('producto')->get();
+    
+    return view('welcome', ['productos' => $productos]);
+});
 
-        // 2. Intentar leer una tabla real (CAMBIA 'productos' POR TU TABLA)
-        $tabla = 'public.producto'; 
-        $cantidad = DB::table($tabla)->count();
-        $datosStatus = "📊 La tabla '$tabla' tiene $cantidad registros.";
-
-    } catch (\Exception $e) {
-        $dbStatus = "❌ Error: " . $e->getMessage();
-        $datosStatus = "No se pudo leer la tabla.";
-    }
-
-    return "
-    <div style='font-family: sans-serif; text-align: center; padding: 50px;'>
-        <h1>🚀 Sistema de Inventario MXO</h1>
-        <p style='font-size: 1.2em;'><strong>$dbStatus</strong></p>
-        <p style='background: #f4f4f4; padding: 10px; display: inline-block;'>$datosStatus</p>
-        <hr style='width: 50%; margin: 20px auto;'>
-        <p>Evidencia de Integración de Datos - UCV</p>
-    </div>";
+// Puedes mantener esta ruta solo para pruebas rápidas si quieres
+Route::get('/debug-db', function () {
+    return DB::table('usuario')->get();
 });
