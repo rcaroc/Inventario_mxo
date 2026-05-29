@@ -4,25 +4,22 @@ namespace App\Http\Controllers;
 
 use App\Models\Producto;
 use App\Models\Modelo;
-use App\Models\Stock; // Importante: Importar el modelo Stock
+use App\Models\Stock;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB; // Para usar transacciones
+use Illuminate\Support\Facades\DB;
 
 class ProductoController extends Controller
 {
     /**
-     * Lista de productos
+     * Lista de productos con su stock cargado
      */
     public function index()
     {
-        // Cargamos el modelo y el stock para mostrarlos en la lista
+        // Usamos Eager Loading para cargar el stock y evitar el error "Property [cantidad] does not exist"
         $productos = Producto::with(['modelo', 'stock'])->get();
         return view('productos.index', compact('productos'));
     }
 
-    /**
-     * Muestra el formulario de creación
-     */
     public function create()
     {
         $modelos = Modelo::all();
@@ -30,22 +27,18 @@ class ProductoController extends Controller
     }
 
     /**
-     * Guarda las combinaciones masivas y crea su stock inicial
+     * Guarda combinaciones masivas y crea sus registros de stock iniciales
      */
     public function store(Request $request)
     {
-        // 1. Obtener el nombre del modelo
         $modelo = Modelo::findOrFail($request->modelo_id);
 
-        // 2. Procesar tallas y colores
         $tallas = array_filter(array_map('trim', explode(',', str_replace("\n", ",", $request->tallas))));
         $colores = array_filter(array_map('trim', explode(',', str_replace("\n", ",", $request->colores))));
 
-        // Usamos una transacción para que si algo falla, no se creen productos a medias
         DB::transaction(function () use ($tallas, $colores, $request, $modelo) {
             foreach ($colores as $color) {
                 foreach ($tallas as $talla) {
-                    // 3. Crear el producto
                     $producto = Producto::create([
                         'modelo_id'          => $request->modelo_id,
                         'usuario_id'         => auth()->id() ?? 1,
@@ -55,7 +48,7 @@ class ProductoController extends Controller
                         'producto_proveedor' => null,
                     ]);
 
-                    // 4. Crear el registro de stock inicial vinculado al producto
+                    // Crear fila de stock inicial obligatorio
                     Stock::create([
                         'producto_id' => $producto->producto_id,
                         'cantidad'    => 0,
@@ -64,18 +57,22 @@ class ProductoController extends Controller
             }
         });
 
-        return redirect()->route('productos.index')->with('success', '¡Combinaciones y registros de stock creados!');
+        return redirect()->route('productos.index')->with('success', '¡Productos y registros de stock creados!');
     }
 
     /**
-     * Elimina un producto
+     * Elimina un producto solo si su stock es 0
      */
     public function destroy($id)
     {
-        $producto = Producto::findOrFail($id);
-        
-        // Gracias a onDelete('cascade') en tu migración, 
-        // al eliminar el producto se borrará automáticamente su stock.
+        $producto = Producto::with('stock')->findOrFail($id);
+
+        // Lógica de seguridad en el Servidor
+        if ($producto->stock && $producto->stock->cantidad > 0) {
+            return redirect()->route('productos.index')
+                             ->with('error', 'No se puede eliminar un producto que tiene stock disponible.');
+        }
+
         $producto->delete();
 
         return redirect()->route('productos.index')->with('eliminar', 'ok');
