@@ -3,32 +3,48 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
 
-// --- RUTA PRINCIPAL ---
+// --- RUTA RAÍZ (DASHBOARD) ---
 Route::get('/', function () {
-    try {
-        $productos = DB::table('producto')->get();
-        return view('inicio', ['productos' => $productos]);
-    } catch (\Exception $e) {
-        return "Error de conexión: " . $e->getMessage();
-    }
-})->name('inicio');
+    return view('inicio'); 
+})->name('home');
 
-// --- RUTAS PARA MODELOS (Para que no fallen los botones de la vista) ---
-Route::prefix('modelos')->group(function () {
-    Route::get('/', function () { return "Lista de Modelos"; })->name('modelos.index');
-    Route::get('/crear', function () { return "Formulario para crear modelo"; })->name('modelos.create');
-    Route::post('/', function () { return "Guardando modelo..."; })->name('modelos.store');
-});
-
-// --- RUTAS PARA PRODUCTOS ---
-Route::prefix('productos')->group(function () {
-    Route::get('/', function () { return redirect()->route('inicio'); })->name('productos.index');
-    Route::get('/crear', function () { return "Formulario para crear producto"; })->name('productos.create');
-    Route::post('/', function () { return "Guardando producto..."; })->name('productos.store');
-});
-
-// --- RUTAS PARA USUARIOS ---
+// --- GRUPO USUARIOS (Con Lista y Nuevo) ---
 Route::prefix('usuarios')->group(function () {
-    Route::get('/', function () { return "Lista de Usuarios"; })->name('usuarios.index');
-    Route::get('/crear', function () { return "Formulario para crear usuario"; })->name('usuarios.create');
+    
+    // Opción: Lista de usuarios
+    Route::get('/lista', function () {
+        $usuarios = DB::table('usuario')->get();
+        return view('usuarios.index', ['usuarios' => $usuarios]);
+    })->name('usuarios.index');
+
+    // Opción: Nuevo usuario
+    Route::get('/nuevo', function () {
+        return view('usuarios.create');
+    })->name('usuarios.create');
+    
+    // Ruta para procesar el guardado del nuevo usuario
+    Route::post('/guardar', function () {
+        return "Procesando nuevo usuario...";
+    })->name('usuarios.store');
 });
+
+// --- GRUPO CATÁLOGO (MODELOS) ---
+Route::prefix('modelos')->group(function () {
+    Route::get('/', function () { 
+        $modelos = DB::table('modelo')->get();
+        return view('modelos.index', compact('modelos')); 
+    })->name('modelos.index');
+    
+    Route::get('/crear', function () { 
+        return view('modelos.create'); 
+    })->name('modelos.create');
+});
+
+// --- OTRAS RUTAS NECESARIAS ---
+Route::get('/movimientos', function () { return view('movimientos.index'); })->name('movimientos.index');
+Route::get('/reportes', function () { return view('reportes.index'); })->name('reportes.index');
+
+// --- CERRAR SESIÓN ---
+Route::post('/logout', function () {
+    return redirect('/');
+})->name('logout');
