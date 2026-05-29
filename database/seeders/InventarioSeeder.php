@@ -5,43 +5,44 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use App\Models\Usuario;
 use App\Models\Modelo;
-use App\Models\Producto;
-use App\Models\Stock;
 use Illuminate\Support\Facades\Hash;
 
 class InventarioSeeder extends Seeder
 {
+    /**
+     * Run the database seeds.
+     */
     public function run(): void
     {
-        // 1. Creamos un Usuario Administrador
-        $usuario = Usuario::create([
-            'usuario_nombre' => 'Admin',
-            'usuario_apellido' => 'Sistema',
-            'usuario_usuario' => 'admin_ucv',
-            'usuario_clave' => Hash::make('12345'), // Encriptada por seguridad
-            'rol' => 'administrador'
-        ]);
+        // 1. Crear o Actualizar el Usuario Administrador
+        // Esto evita el error de "Unique violation" que viste en Render
+        Usuario::updateOrCreate(
+            ['usuario_usuario' => 'admin_ucv'], // Si encuentra este usuario...
+            [
+                'usuario_nombre' => 'Admin',
+                'usuario_apellido' => 'Sistema',
+                'usuario_clave' => Hash::make('admin123'), // Cambia 'admin123' por tu clave
+                'rol' => 'administrador'
+            ]
+        );
 
-        // 2. Creamos un Modelo de calzado/prenda
-        $modelo = Modelo::create([
-            'modelo_nombre' => 'Zapatilla Urban v1',
-            'modelo_ubicacion' => 'Almacén Central - Estante A1'
-        ]);
+        // 2. Crear o Actualizar Modelos de ejemplo (Basado en tu Balsamiq)
+        // Agregamos algunos para que tu tabla no aparezca vacía al iniciar
+        Modelo::updateOrCreate(
+            ['modelo_nombre' => 'Laptop HP ProBook'], 
+            ['modelo_marca' => 'HP']
+        );
 
-        // 3. Creamos un Producto vinculado a los dos anteriores
-        $producto = Producto::create([
-            'modelo_id' => $modelo->modelo_id,
-            'usuario_id' => $usuario->usuario_id,
-            'producto_nombre' => 'Zapatilla Urban Classic',
-            'producto_talla' => '42',
-            'producto_color' => 'Negro',
-            'producto_proveedor' => 'Proveedor Gamarra SAC'
-        ]);
+        Modelo::updateOrCreate(
+            ['modelo_nombre' => 'Monitor Dell 24"'], 
+            ['modelo_marca' => 'Dell']
+        );
 
-        // 4. Inicializamos el Stock para ese producto
-        Stock::create([
-            'producto_id' => $producto->producto_id,
-            'cantidad' => 50
-        ]);
+        Modelo::updateOrCreate(
+            ['modelo_nombre' => 'Teclado Mecánico RGB'], 
+            ['modelo_marca' => 'Logitech']
+        );
+
+        $this->command->info('Seeder ejecutado con éxito: Datos actualizados sin duplicados.');
     }
 }
