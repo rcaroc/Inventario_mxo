@@ -39,7 +39,7 @@
                         <tr>
                             <th class="ps-4 py-3 fw-bold text-dark">Modelo</th>
                             <th class="py-3 fw-bold text-dark">Ubicación</th>
-                            <th class="py-3 fw-bold text-dark text-center">Total productos</th>
+                            <th class="py-3 fw-bold text-dark text-center">Variantes Creadas</th>
                             <th class="py-3 fw-bold text-dark text-center">Acciones</th>
                         </tr>
                     </thead>
@@ -51,26 +51,38 @@
                                 <span class="text-muted">{{ $item->modelo_ubicacion ?? 'Sin ubicación' }}</span>
                             </td>
                             <td class="text-center">
-                                <span class="badge bg-light text-dark border px-3">0</span>
+                                {{-- Muestra cuántas combinaciones (Color/Talla) existen de este modelo --}}
+                                <span class="badge bg-light text-dark border px-3">
+                                    {{ $item->productos_count ?? 0 }}
+                                </span>
                             </td>
                             <td class="text-center">
                                 <div class="d-flex justify-content-center gap-2">
                                     
-                                    {{-- BOTÓN EDITAR (ESTILO IMAGEN) --}}
+                                    {{-- BOTÓN EDITAR --}}
                                     <a href="{{ route('modelos.edit', $item->modelo_id) }}" class="btn-editar-custom">
                                         Editar
                                     </a>
                                     
-                                    {{-- FORMULARIO OCULTO PARA ELIMINAR --}}
-                                    <form id="form-eliminar-{{ $item->modelo_id }}" action="{{ route('modelos.destroy', $item->modelo_id) }}" method="POST" style="display: none;">
-                                        @csrf
-                                        @method('DELETE')
-                                    </form>
+                                    {{-- LÓGICA DE ELIMINACIÓN --}}
+                                    @if(($item->productos_count ?? 0) > 0)
+                                        {{-- Botón Deshabilitado (Color rosado pálido) --}}
+                                        <button type="button" class="btn-eliminar-custom" 
+                                            style="background-color: #ef9a9a !important; cursor: not-allowed; opacity: 0.7;" 
+                                            title="No se puede eliminar: existen productos asociados a este modelo">
+                                            Eliminar
+                                        </button>
+                                    @else
+                                        {{-- Botón Activo --}}
+                                        <form id="form-eliminar-{{ $item->modelo_id }}" action="{{ route('modelos.destroy', $item->modelo_id) }}" method="POST" style="display: none;">
+                                            @csrf
+                                            @method('DELETE')
+                                        </form>
 
-                                    {{-- BOTÓN ELIMINAR (ESTILO IMAGEN) --}}
-                                    <button type="button" class="btn-eliminar-custom" onclick="confirmarEliminar({{ $item->modelo_id }})">
-                                        Eliminar
-                                    </button>
+                                        <button type="button" class="btn-eliminar-custom" onclick="confirmarEliminar({{ $item->modelo_id }})">
+                                            Eliminar
+                                        </button>
+                                    @endif
 
                                 </div>
                             </td>
