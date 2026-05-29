@@ -1,7 +1,11 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\DB; // IMPORTANTE: Para usar la base de datos
+use App\Http\Controllers\UsuarioController;
+use App\Http\Controllers\ModeloController;
+use App\Http\Controllers\ProductoController;
+use App\Http\Controllers\MovimientoController;
+use App\Http\Controllers\ReporteController;
 
 // --- INICIO ---
 Route::get('/', function () { 
@@ -10,43 +14,35 @@ Route::get('/', function () {
 
 // --- USUARIOS ---
 Route::prefix('usuarios')->group(function () {
-    Route::get('/lista', function () { 
-        $usuarios = DB::table('usuario')->get(); // Trae todo de la tabla 'usuario'
-        return view('usuarios.index', compact('usuarios')); 
-    })->name('usuarios.index');
-
-    Route::get('/crear', function () { return view('usuarios.create'); })->name('usuarios.create');
-    Route::post('/guardar', function () { return "Guardado"; })->name('usuarios.store');
+    Route::get('/lista', [UsuarioController::class, 'index'])->name('usuarios.index');
+    Route::get('/crear', [UsuarioController::class, 'create'])->name('usuarios.create');
+    Route::post('/guardar', [UsuarioController::class, 'store'])->name('usuarios.store');
 });
 
-// --- CATÁLOGO ---
+// --- CATÁLOGO (Modelos y Productos) ---
 Route::prefix('catalogo')->group(function () {
-    Route::get('/modelos', function () { 
-        $modelos = DB::table('modelo')->get(); // Trae todo de la tabla 'modelo'
-        return view('modelos.index', compact('modelos')); 
-    })->name('modelos.index');
+    // Modelos
+    Route::get('/modelos', [ModeloController::class, 'index'])->name('modelos.index');
+    Route::get('/modelos/nuevo', [ModeloController::class, 'create'])->name('modelos.create');
+    Route::post('/modelos/guardar', [ModeloController::class, 'store'])->name('modelos.store');
 
-    Route::get('/modelos/nuevo', function () { return view('modelos.create'); })->name('modelos.create');
-
-    Route::get('/productos', function () { 
-        $productos = DB::table('producto')->get(); // Trae todo de la tabla 'producto'
-        return view('productos.index', compact('productos')); 
-    })->name('productos.index');
-
-    Route::get('/productos/nuevo', function () { return view('productos.create'); })->name('productos.create');
+    // Productos
+    Route::get('/productos', [ProductoController::class, 'index'])->name('productos.index');
+    Route::get('/productos/nuevo', [ProductoController::class, 'create'])->name('productos.create');
+    Route::post('/productos/guardar', [ProductoController::class, 'store'])->name('productos.store');
 });
 
 // --- MOVIMIENTOS ---
 Route::prefix('movimientos')->group(function () {
-    Route::get('/entrada', function () { return view('movimientos.entrada'); })->name('movimientos.entrada');
-    Route::get('/salida', function () { return view('movimientos.salida'); })->name('movimientos.salida');
-    Route::get('/historial', function () { return view('movimientos.historial'); })->name('movimientos.historial');
+    Route::get('/entrada', [MovimientoController::class, 'entrada'])->name('movimientos.entrada');
+    Route::get('/salida', [MovimientoController::class, 'salida'])->name('movimientos.salida');
+    Route::get('/historial', [MovimientoController::class, 'historial'])->name('movimientos.historial');
 });
 
 // --- REPORTES ---
 Route::prefix('reportes')->group(function () {
-    Route::get('/stock-modelo', function () { return view('reportes.stock_modelo'); })->name('reportes.modelo');
-    Route::get('/stock-talla-color', function () { return view('reportes.stock_talla'); })->name('reportes.talla');
+    Route::get('/stock-modelo', [ReporteController::class, 'stockModelo'])->name('reportes.modelo');
+    Route::get('/stock-talla-color', [ReporteController::class, 'stockTalla'])->name('reportes.talla');
 });
 
 Route::post('/logout', function () { return redirect('/'); })->name('logout');
