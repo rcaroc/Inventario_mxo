@@ -5,47 +5,44 @@ namespace App\Http\Controllers;
 use App\Models\Modelo;
 use App\Models\Producto;
 use App\Models\Movimiento;
+use App\Models\Stock; // Importamos el modelo Stock
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 
 class MovimientoController extends Controller
 {
-    // Muestra la vista de Entrada
     public function createEntrada()
     {
         $modelos = Modelo::orderBy('modelo_nombre', 'asc')->get();
         return view('movimientos.entrada', compact('modelos'));
     }
 
-    // Muestra la vista de Salida
     public function createSalida()
     {
         $modelos = Modelo::orderBy('modelo_nombre', 'asc')->get();
         return view('movimientos.salida', compact('modelos'));
     }
 
-    // Procesa el guardado de Entrada
     public function storeEntrada(Request $request)
     {
         $this->registrar($request, 'entrada');
         return redirect()->route('movimientos.entrada')->with('success', 'Entrada registrada con éxito.');
     }
 
-    // Procesa el guardado de Salida
     public function storeSalida(Request $request)
     {
-        // Validación lógica: No sacar más de lo que existe
-        $producto = Producto::findOrFail($request->producto_id);
-        if ($producto->producto_stock < $request->cantidad) {
-            return redirect()->back()->with('error', 'Stock insuficiente. Disponible: ' . $producto->producto_stock);
+        // Validación: Buscar el stock en la tabla 'stock'
+        $stock = Stock::where('producto_id', $request->producto_id)->first();
+        
+        if (!$stock || $stock->cantidad < $request->cantidad) {
+            return redirect()->back()->with('error', 'Stock insuficiente. Disponible: ' . ($stock->cantidad ?? 0));
         }
 
         $this->registrar($request, 'salida');
         return redirect()->route('movimientos.salida')->with('success', 'Salida registrada con éxito.');
     }
 
-    // Lógica común para ambos tipos
     private function registrar(Request $request, $tipo)
     {
         $request->validate([
@@ -54,6 +51,7 @@ class MovimientoController extends Controller
         ]);
 
         DB::transaction(function () use ($request, $tipo) {
+            // 1. Crear el movimiento
             Movimiento::create([
                 'producto_id' => $request->producto_id,
                 'usuario_id'  => Auth::id() ?? 1,
@@ -62,17 +60,21 @@ class MovimientoController extends Controller
                 'descripcion' => $request->descripcion ?? ucfirst($tipo) . " manual de inventario",
             ]);
 
-            $producto = Producto::findOrFail($request->producto_id);
+            // 2. ACTUALIZAR EN LA TABLA 'stock' (No en 'producto')
+            // Buscamos el registro por producto_id
+            $registroStock = Stock::where('producto_id', $request->producto_id)->first();
+
             if ($tipo == 'entrada') {
-                $producto->increment('producto_stock', $request->cantidad);
+                $registroStock->increment('cantidad', $request->cantidad);
             } else {
-                $producto->decrement('producto_stock', $request->cantidad);
+                $registroStock->decrement('cantidad', $request->cantidad);
             }
         });
     }
 
     public function getProductosPorModelo($modelo_id)
     {
+        // Retornamos los productos del modelo
         return response()->json(Producto::where('modelo_id', $modelo_id)->get());
     }
 
