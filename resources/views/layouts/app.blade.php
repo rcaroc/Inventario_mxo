@@ -11,6 +11,45 @@
         body { background-color: #f4f6f9; }
         .navbar-dark { background-color: #1a1d20 !important; }
         .dropdown-menu { border: none; box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15); }
+
+        /* --- ESTILOS DE BOTONES PERSONALIZADOS (ESTILO IMAGEN) --- */
+        .btn-editar-custom {
+            background-color: #5c6bc0 !important; /* Azul/Violeta */
+            color: white !important;
+            padding: 7px 18px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 14px;
+            border: none;
+            font-weight: 500;
+            display: inline-block;
+            transition: background 0.3s;
+        }
+
+        .btn-eliminar-custom {
+            background-color: #ef5350 !important; /* Rojo/Rosado */
+            color: white !important;
+            padding: 7px 18px;
+            border-radius: 4px;
+            border: none;
+            font-size: 14px;
+            font-weight: 500;
+            display: inline-block;
+            transition: background 0.3s;
+        }
+
+        .btn-editar-custom:hover { background-color: #3f51b5 !important; }
+        .btn-eliminar-custom:hover { background-color: #e53935 !important; }
+        
+        /* Botón Guardar tipo cápsula */
+        .btn-guardar-custom {
+            background-color: #3498db !important;
+            color: white !important;
+            border-radius: 25px;
+            padding: 10px 40px;
+            border: none;
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
