@@ -6,5 +6,5 @@ use Illuminate\Database\Eloquent\Model;
 
 class Producto extends Model
 {
-    //
+    protected $table = 'producto'; // Así le dices que no busque "productos"
 }
