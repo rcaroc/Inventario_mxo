@@ -1,20 +1,31 @@
 <?php
 
-namespace App\Models;
+namespace App\Http\Controllers;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model as LaravelModel; // Renombramos el core para evitar conflicto
+use App\Models\Modelo; // Tu nombre exacto de archivo
+use Illuminate\Http\Request;
 
-class Modelo extends LaravelModel
+class ModeloController extends Controller
 {
-    use HasFactory;
+    public function index(Request $request)
+    {
+        $query = $request->input('buscar');
+        
+        // Buscamos por nombre o ubicación si hay algo escrito en el buscador
+        $modelos = Modelo::when($query, function ($q) use ($query) {
+            return $q->where('modelo_nombre', 'LIKE', "%$query%")
+                     ->orWhere('modelo_ubicacion', 'LIKE', "%$query%");
+        })->get();
 
-    protected $table = 'modelo'; // Tu tabla en Supabase
-    protected $primaryKey = 'modelo_id';
-    public $timestamps = true;
+        return view('modelos.index', compact('modelos'));
+    }
 
-    protected $fillable = [
-        'modelo_nombre',
-        'modelo_ubicacion'
-    ];
+    public function destroy($id)
+    {
+        $modelo = Modelo::findOrFail($id);
+        $modelo->delete();
+
+        // Enviamos la señal para el cuadro azul
+        return redirect()->route('modelos.index')->with('eliminar', 'ok');
+    }
 }
