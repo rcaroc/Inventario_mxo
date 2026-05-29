@@ -6,16 +6,17 @@ use Illuminate\Database\Seeder;
 use App\Models\Usuario;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 
 class InventarioSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. Limpiar tabla de usuarios (esta sí sabemos que existe por el error anterior)
+        // 1. Limpiamos solo la tabla de usuarios
+        // RESTART IDENTITY reinicia el contador de IDs a 1
         DB::statement('TRUNCATE TABLE usuario RESTART IDENTITY CASCADE');
 
-        // 2. Crear el Usuario Administrador
+        // 2. Creamos el usuario administrador
+        // Asegúrate de que estos campos existan en tu tabla 'usuario'
         Usuario::create([
             'usuario_nombre'   => 'Admin',
             'usuario_apellido' => 'Sistema',
@@ -24,20 +25,6 @@ class InventarioSeeder extends Seeder
             'rol'              => 'administrador'
         ]);
 
-        // 3. Limpiar y sembrar tabla de modelos SOLO si existe
-        // Verificamos si se llama 'modelo' o 'modelos'
-        $tablaModelos = Schema::hasTable('modelo') ? 'modelo' : (Schema::hasTable('modelos') ? 'modelos' : null);
-
-        if ($tablaModelos) {
-            DB::statement("TRUNCATE TABLE $tablaModelos RESTART IDENTITY CASCADE");
-            
-            // Insertar datos de prueba usando DB para evitar problemas de Modelos
-            DB::table($tablaModelos)->insert([
-                ['modelo_nombre' => 'Laptop HP ProBook', 'modelo_marca' => 'HP'],
-                ['modelo_nombre' => 'Monitor Dell 24"', 'modelo_marca' => 'Dell']
-            ]);
-        }
-
-        $this->command->info('¡Éxito! Datos limpiados y sembrados.');
+        $this->command->info('Usuario admin creado. Omitiendo modelos por ahora para evitar errores de columnas.');
     }
 }
