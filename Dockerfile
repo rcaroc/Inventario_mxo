@@ -30,5 +30,5 @@ RUN mkdir -p /var/www/html/storage/framework/cache/data \
     && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 RUN php artisan config:clear && php artisan route:clear && php artisan view:clear
 # Ejecutar migraciones automáticamente al iniciar el contenedor
-CMD php artisan migrate --force && apache2 -D FOREGROUND
+CMD php artisan migrate --force && apache2ctl -D FOREGROUND
 EXPOSE 80
