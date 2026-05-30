@@ -52,7 +52,7 @@
                                 {{ $mov->tipo == 'salida' ? '-' : '+' }}{{ $mov->cantidad }}
                             </td>
                             <td class="text-muted">
-                                {{ $mov->usuario->usuario_nombre ?? 'Admin' }}
+                                {{ $mov->usuario->usuario_usuario ?? 'Admin' }}
                             </td>
                             <td>
                                 <small class="text-secondary">{{ $mov->descripcion ?? '---' }}</small>
