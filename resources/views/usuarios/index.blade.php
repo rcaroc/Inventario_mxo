@@ -42,7 +42,6 @@
                             </td>
                             <td class="text-muted">{{ $user->usuario_usuario }}</td>
                             
-                            {{-- COLUMNA DE ROL --}}
                             <td class="text-center">
                                 @if(strtolower($user->rol) == 'administrador')
                                     <span class="badge-admin">Administrador</span>
@@ -58,30 +57,26 @@
                             <td class="text-center">
                                 <div class="d-flex justify-content-center gap-2">
                                     
-                                    {{-- LÓGICA DE PROTECCIÓN: Si el usuario de la fila NO es administrador, mostramos botones --}}
+                                    {{-- EL BOTÓN EDITAR SIEMPRE SE MUESTRA (Permite cambio de pass) --}}
+                                    <a href="{{ route('usuarios.edit', $user->usuario_id) }}" class="btn-editar-custom">
+                                        Editar
+                                    </a>
+                                    
+                                    {{-- EL BOTÓN ELIMINAR SÓLO SE MUESTRA SI NO ES ADMINISTRADOR --}}
                                     @if(strtolower($user->rol) !== 'administrador')
-                                        
-                                        {{-- BOTÓN EDITAR --}}
-                                        <a href="{{ route('usuarios.edit', $user->usuario_id) }}" class="btn-editar-custom">
-                                            Editar
-                                        </a>
-                                        
-                                        {{-- FORMULARIO OCULTO PARA ELIMINAR --}}
                                         <form id="form-eliminar-{{ $user->usuario_id }}" action="{{ route('usuarios.destroy', $user->usuario_id) }}" method="POST" style="display: none;">
                                             @csrf
                                             @method('DELETE')
                                         </form>
 
-                                        {{-- BOTÓN ELIMINAR --}}
                                         <button type="button" class="btn-eliminar-custom" onclick="confirmarEliminar({{ $user->usuario_id }})">
                                             Eliminar
                                         </button>
-
                                     @else
-                                        {{-- Si es administrador, mostramos un indicador de que es una cuenta protegida --}}
-                                        <span class="badge bg-light text-secondary border">
-                                            <i class="fas fa-lock me-1"></i> Sistema
-                                        </span>
+                                        {{-- Para el Admin, mostramos un candado en lugar del botón eliminar --}}
+                                        <button type="button" class="btn-eliminar-custom" style="background-color: #cfd8dc !important; cursor: not-allowed;" title="Cuenta de sistema protegida" disabled>
+                                            <i class="fas fa-lock"></i>
+                                        </button>
                                     @endif
 
                                 </div>
