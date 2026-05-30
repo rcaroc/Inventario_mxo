@@ -46,11 +46,12 @@
 <script>
 $(document).ready(function() {
     var table = $('#tabla-stock-modelo').DataTable({
-        "order": [[ 3, "desc" ]],
+        "order": [[ 0, "asc" ]],
         "language": {
             "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json"
         },
-        "dom": '<"d-flex justify-content-between"f>rt<"d-flex justify-content-between"ip>', 
+        // Añadimos 'B' al inicio para que renderice los Buttons
+        "dom": '<"d-flex justify-content-between align-items-center"Bf>rt<"d-flex justify-content-between"ip>', 
         "buttons": [
             {
                 extend: 'excelHtml5',
@@ -67,8 +68,9 @@ $(document).ready(function() {
         ]
     });
 
-    // Inyectamos los botones en el div que creamos arriba
-    table.buttons().container().appendTo('#contenedor-botones');
+    // Esta línea ya no es necesaria si usamos la 'B' en el dom, 
+    // pero la dejamos comentada por si quieres moverlos manualmente después.
+    // table.buttons().container().appendTo('#contenedor-botones');
 });
 </script>
 @endsection
