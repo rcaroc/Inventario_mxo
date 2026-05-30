@@ -110,7 +110,7 @@
                                     </td>
                                     <td>
                                         <i class="fas fa-user-circle me-1 text-muted"></i>
-                                        {{ $mov->usuario->usuario_nombre ?? 'Sistema' }}
+                                        {{ $mov->usuario->usuario_usuario ?? 'Sistema' }}
                                     </td>
                                     <td class="text-muted small">
                                         {{ $mov->created_at->format('d/m/Y') }} 
