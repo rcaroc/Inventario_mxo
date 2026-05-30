@@ -3,18 +3,20 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Modelo; // Importante
-use Illuminate\Support\Facades\DB; // Importante para el sum
+use App\Models\Modelo;
+use Illuminate\Support\Facades\DB;
 
 class ReporteController extends Controller
 {
-    public function reportePorModelo()
+    /**
+     * Reporte de Stock por Modelo
+     */
+    public function stockModelo()
     {
-        // Obtenemos los modelos con el conteo de productos
+        // Traemos modelos, contamos sus variantes y sumamos el stock total
         $reporte = Modelo::withCount('productos')
             ->get()
             ->map(function ($modelo) {
-                // Sumamos el stock de todos los productos que pertenecen a este modelo
                 $modelo->stock_total = DB::table('stock')
                     ->join('producto', 'stock.producto_id', '=', 'producto.producto_id')
                     ->where('producto.modelo_id', $modelo->modelo_id)
@@ -25,5 +27,14 @@ class ReporteController extends Controller
         $totalGeneral = $reporte->sum('stock_total');
 
         return view('reportes.modelo', compact('reporte', 'totalGeneral'));
+    }
+
+    /**
+     * Reporte de Stock por Talla y Color (Estructura base)
+     */
+    public function stockTalla()
+    {
+        // Por ahora lo dejamos simple para que no de error la ruta
+        return view('reportes.talla');
     }
 }
