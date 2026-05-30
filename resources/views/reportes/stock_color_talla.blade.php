@@ -10,6 +10,9 @@
     .btn-export-excel { background-color: #48c78e !important; color: white !important; border: none !important; }
     .btn-export-pdf { background-color: #5dade2 !important; color: white !important; border: none !important; }
     .form-label { font-size: 0.85rem; margin-bottom: 4px; }
+
+    /* Ajuste visual para la tabla en pantalla */
+    #tabla-color-talla th { background-color: #f8f9fa; }
 </style>
 @endsection
 
@@ -108,36 +111,61 @@
 @section('js')
 <script>
 $(document).ready(function() {
-    // 1. Forzar el registro de fuentes de PDFMake inmediatamente
-    if (window.pdfMake) {
-        pdfMake.vfs = pdfMake.vfs;
-    }
-
-    // 2. Inicializar la tabla
+    // 1. Inicializar la tabla
     var table = $('#tabla-color-talla').DataTable({
         "order": [[ 0, "asc" ]],
         "language": { "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json" },
-        "dom": 'Brtip', // La 'B' es obligatoria para que el PDF exista en memoria
+        "dom": 'Brtip', 
         "buttons": [
             { 
                 extend: 'excelHtml5', 
                 footer: true,
-                title: 'Reporte Stock'
+                title: 'Reporte de Stock'
             },
             { 
                 extend: 'pdfHtml5', 
                 footer: true,
-                title: 'Reporte Stock',
-                // Configuraciones de seguridad para evitar bloqueos
-                download: 'download', 
+                title: 'Reporte de Stock por Color y Talla',
                 orientation: 'portrait',
+                pageSize: 'A4',
+                exportOptions: {
+                    columns: [0, 1, 2, 3]
+                },
                 customize: function(doc) {
-                    // Limpieza del footer repetido
+                    // Ajustar anchos de columnas para que no se vea apretado
+                    doc.content[1].table.widths = ['40%', '20%', '20%', '20%'];
+                    
+                    // Estilos generales de la tabla
+                    var rowCount = doc.content[1].table.body.length;
+                    for (var i = 1; i < rowCount; i++) {
+                        doc.content[1].table.body[i][1].alignment = 'center';
+                        doc.content[1].table.body[i][2].alignment = 'center';
+                        doc.content[1].table.body[i][3].alignment = 'center';
+                        // Dar padding a las celdas
+                        for (var j = 0; j < 4; j++) {
+                            doc.content[1].table.body[i][j].margin = [5, 5, 5, 5];
+                        }
+                    }
+
+                    // Arreglar el Footer en el PDF
                     if (doc.content[1].table.footer) {
                         var footerRow = doc.content[1].table.footer[0];
+                        footerRow[0].text = 'TOTAL GENERAL';
+                        footerRow[0].alignment = 'right';
                         footerRow[1].text = ''; 
                         footerRow[2].text = '';
+                        footerRow[3].alignment = 'center';
+                        footerRow[3].fillColor = '#f8f9fa';
                     }
+
+                    // Título del PDF
+                    doc.styles.title = {
+                        color: '#2d3748',
+                        fontSize: '16',
+                        bold: true,
+                        alignment: 'center',
+                        margin: [0, 0, 0, 15]
+                    };
                 }
             }
         ],
@@ -150,39 +178,40 @@ $(document).ready(function() {
                 }
                 return typeof i === 'number' ? i : 0;
             };
+
             total = api.column(3, { filter: 'applied' }).data().reduce(function (a, b) {
                 return intVal(a) + intVal(b);
             }, 0);
+
             $(api.column(3).footer()).html(total);
         }
     });
 
-    // 3. OCULTAR LOS BOTONES PLOMOS (De forma segura)
-    // En lugar de borrarlos, los movemos fuera de la vista para que sigan siendo funcionales
+    // 2. Ocultar contenedores de botones originales
     table.buttons().container().css({
         'position': 'absolute',
         'left': '-9999px'
     });
 
-    // 4. VINCULAR TUS BOTONES (Usando disparador por clase)
-    $('#btn-excel-custom').on('click', function(e) {
-        e.preventDefault();
-        $('.buttons-excel').click(); // Simula el clic en el botón oculto
+    // 3. Vincular tus botones personalizados
+    $('#btn-excel-custom').on('click', function() {
+        $('.buttons-excel').click();
     });
 
-    $('#btn-pdf-custom').on('click', function(e) {
-        e.preventDefault();
-        console.log("Iniciando descarga de PDF...");
-        $('.buttons-pdf').click(); // Simula el clic en el botón oculto
+    $('#btn-pdf-custom').on('click', function() {
+        $('.buttons-pdf').click();
     });
 
-    // 5. Filtros Aplicar / Limpiar
+    // 4. Lógica de Filtros
     $('#btn-aplicar').on('click', function() {
         table.column(0).search($('#filtro-modelo').val());
+        
         let color = $('#filtro-color').val();
         table.column(1).search(color ? '^' + color + '$' : '', true, false);
+        
         let talla = $('#filtro-talla').val();
         table.column(2).search(talla ? '^' + talla + '$' : '', true, false);
+        
         table.draw();
     });
 
