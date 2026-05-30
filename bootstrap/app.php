@@ -19,6 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // 2. TUS ALIAS YA EXISTENTES
         $middleware->alias([
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
+            'admin_o_inventario' => \App\Http\Middleware\AdminOrInventario::class, 
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
