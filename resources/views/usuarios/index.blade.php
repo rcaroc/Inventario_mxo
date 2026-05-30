@@ -42,13 +42,13 @@
                             </td>
                             <td class="text-muted">{{ $user->usuario_usuario }}</td>
                             
-                            {{-- COLUMNA DE ROL CON COLORES E IMAGEN --}}
+                            {{-- COLUMNA DE ROL --}}
                             <td class="text-center">
-                                @if($user->rol == 'administrador')
+                                @if(strtolower($user->rol) == 'administrador')
                                     <span class="badge-admin">Administrador</span>
-                                @elseif($user->rol == 'ventas')
+                                @elseif(strtolower($user->rol) == 'ventas')
                                     <span class="badge-ventas">Encargado de Ventas</span>
-                                @elseif($user->rol == 'inventario')
+                                @elseif(strtolower($user->rol) == 'inventario')
                                     <span class="badge-inventario">Encargado de Inventario</span>
                                 @else
                                     <span class="badge bg-light text-dark border">{{ $user->rol }}</span>
@@ -58,21 +58,31 @@
                             <td class="text-center">
                                 <div class="d-flex justify-content-center gap-2">
                                     
-                                    {{-- BOTÓN EDITAR (ESTILO IMAGEN) --}}
-                                    <a href="{{ route('usuarios.edit', $user->usuario_id) }}" class="btn-editar-custom">
-                                        Editar
-                                    </a>
-                                    
-                                    {{-- FORMULARIO OCULTO PARA ELIMINAR --}}
-                                    <form id="form-eliminar-{{ $user->usuario_id }}" action="{{ route('usuarios.destroy', $user->usuario_id) }}" method="POST" style="display: none;">
-                                        @csrf
-                                        @method('DELETE')
-                                    </form>
+                                    {{-- LÓGICA DE PROTECCIÓN: Si el usuario de la fila NO es administrador, mostramos botones --}}
+                                    @if(strtolower($user->rol) !== 'administrador')
+                                        
+                                        {{-- BOTÓN EDITAR --}}
+                                        <a href="{{ route('usuarios.edit', $user->usuario_id) }}" class="btn-editar-custom">
+                                            Editar
+                                        </a>
+                                        
+                                        {{-- FORMULARIO OCULTO PARA ELIMINAR --}}
+                                        <form id="form-eliminar-{{ $user->usuario_id }}" action="{{ route('usuarios.destroy', $user->usuario_id) }}" method="POST" style="display: none;">
+                                            @csrf
+                                            @method('DELETE')
+                                        </form>
 
-                                    {{-- BOTÓN ELIMINAR (ESTILO IMAGEN) --}}
-                                    <button type="button" class="btn-eliminar-custom" onclick="confirmarEliminar({{ $user->usuario_id }})">
-                                        Eliminar
-                                    </button>
+                                        {{-- BOTÓN ELIMINAR --}}
+                                        <button type="button" class="btn-eliminar-custom" onclick="confirmarEliminar({{ $user->usuario_id }})">
+                                            Eliminar
+                                        </button>
+
+                                    @else
+                                        {{-- Si es administrador, mostramos un indicador de que es una cuenta protegida --}}
+                                        <span class="badge bg-light text-secondary border">
+                                            <i class="fas fa-lock me-1"></i> Sistema
+                                        </span>
+                                    @endif
 
                                 </div>
                             </td>
