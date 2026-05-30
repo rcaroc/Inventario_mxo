@@ -34,8 +34,10 @@
                     </tbody>
                     <tfoot class="table-light border-top">
                         <tr class="fw-bold text-dark">
+                            {{-- Ocupamos 3 columnas para que el total se alinee con el stock --}}
                             <td colspan="3" class="text-end py-3">Total general</td>
-                            <td class="text-center py-3 fs-5 text-primary">0</td> 
+                            {{-- Esta es la celda donde DataTables inyectará el resultado --}}
+                            <td class="text-center py-3 fs-5 text-primary"></td> 
                         </tr>
                     </tfoot>
                 </table>
