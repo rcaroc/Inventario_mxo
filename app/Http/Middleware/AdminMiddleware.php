@@ -13,13 +13,13 @@ class AdminMiddleware
      *
      * @param  Closure(Request): (Response)  $next
      */
-public function handle($request, Closure $next)
+public function handle(Request $request, Closure $next): Response
 {
-    // Si el usuario no es Administrador, lo mandamos al home con un mensaje
-    if (auth()->check() && auth()->user()->rol !== 'Administrador') {
-        return redirect('/home')->with('error', 'Acceso denegado. Solo administradores.');
+    // Usamos strtolower para comparar siempre en minúsculas
+    if (auth()->check() && strtolower(auth()->user()->rol) === 'administrador') {
+        return $next($request);
     }
 
-    return $next($request);
+    return redirect('/home')->with('error', 'No tienes permisos de administrador.');
 }
 }
