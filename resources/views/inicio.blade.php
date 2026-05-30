@@ -7,14 +7,7 @@
         <h3 class="fw-bold text-dark mb-0">Panel de Control</h3>
         
         <div class="d-flex gap-2">
-            {{-- Solo el administrador ve el botón de gestión --}}
-            @if(Auth::check() && strtolower(Auth::user()->rol) === 'administrador')
-                <a href="{{ route('usuarios.index') }}" class="btn btn-primary btn-sm shadow-sm px-3 d-flex align-items-center">
-                    <i class="fas fa-users-cog me-2"></i> Gestionar Usuarios
-                </a>
-            @endif
-            
-            {{-- HEMOS ELIMINADO EL BOTÓN DE CERRAR SESIÓN DE AQUÍ --}}
+            {{-- BOTÓN ELIMINADO: Ahora la gestión se hace desde el menú superior --}}
         </div>
     </div>
 
