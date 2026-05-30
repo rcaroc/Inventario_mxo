@@ -2,25 +2,19 @@
 
 @section('content')
 <div class="container-fluid">
-    {{-- Encabezado con Botones de Acción --}}
+    {{-- Encabezado del Panel --}}
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h3 class="fw-bold text-dark mb-0">Panel de Control</h3>
         
         <div class="d-flex gap-2">
-            {{-- BOTÓN PROTEGIDO: Solo el administrador puede verlo --}}
-            @if(auth()->check() && strtolower(auth()->user()->rol) === 'administrador')
+            {{-- Solo el administrador ve el botón de gestión --}}
+            @if(Auth::check() && strtolower(Auth::user()->rol) === 'administrador')
                 <a href="{{ route('usuarios.index') }}" class="btn btn-primary btn-sm shadow-sm px-3 d-flex align-items-center">
                     <i class="fas fa-users-cog me-2"></i> Gestionar Usuarios
                 </a>
             @endif
-
-            {{-- Botón de Salida --}}
-            <form action="{{ route('logout') }}" method="POST">
-                @csrf
-                <button type="submit" class="btn btn-danger btn-sm shadow-sm px-3">
-                    <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
-                </button>
-            </form>
+            
+            {{-- HEMOS ELIMINADO EL BOTÓN DE CERRAR SESIÓN DE AQUÍ --}}
         </div>
     </div>
 
@@ -87,7 +81,7 @@
         </div>
     </div>
 
-    {{-- Fila de Tabla de Movimientos (Ancho Completo) --}}
+    {{-- Fila de Tabla de Movimientos --}}
     <div class="row mt-2">
         <div class="col-12">
             <div class="card shadow-sm border-0">
