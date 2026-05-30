@@ -31,25 +31,27 @@ class UsuarioController extends Controller
      */
 public function store(Request $request)
 {
-    // 1. Validar que el usuario logueado SEA el administrador único
-    // Asumiendo que el rol del admin es 'Administrador'
-    if (auth()->user()->rol !== 'Administrador') {
+    // 1. Validar permisos (Usamos strtolower para evitar problemas de mayúsculas)
+    if (strtolower(auth()->user()->rol) !== 'administrador') {
         return redirect()->back()->with('error', 'No tienes permiso para crear usuarios.');
     }
 
-    // 2. Validación normal
+    // 2. Validación (Los keys de aquí deben ser los 'name' de tu HTML)
     $request->validate([
-        'usuario_nombre' => 'required',
-        'rol' => 'required|in:Encargado de Inventario,Encargado de Ventas', // Solo permite estos dos
-        'password' => 'required|min:8',
+        'usuario_nombre'   => 'required',
+        'usuario_apellido' => 'required',
+        'usuario_usuario'  => 'required|unique:usuario,usuario_usuario', // Nombre de login
+        'usuario_clave'    => 'required|min:6', // La clave
+        'rol'              => 'required|in:Encargado de Inventario,Encargado de Ventas',
     ]);
 
-    // 3. Crear el usuario
+    // 3. Crear el usuario con los nombres de tu $fillable
     Usuario::create([
-        'usuario_nombre' => $request->usuario_nombre,
+        'usuario_nombre'   => $request->usuario_nombre,
         'usuario_apellido' => $request->usuario_apellido,
-        'rol' => $request->rol, // Aquí ya viene filtrado por la validación de arriba
-        'password' => bcrypt($request->password),
+        'usuario_usuario'  => $request->usuario_usuario, // <--- Este faltaba
+        'usuario_clave'    => bcrypt($request->usuario_clave), // <--- Usamos usuario_clave
+        'rol'              => $request->rol,
     ]);
 
     return redirect()->route('usuarios.index')->with('success', 'Usuario creado correctamente.');
