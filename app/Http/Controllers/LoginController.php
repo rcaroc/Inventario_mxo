@@ -32,10 +32,13 @@ class LoginController extends Controller
     }
 
     // Cerrar sesión
-    public function logout(Request $request) {
-        Auth::logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-        return redirect('/login');
-    }
+        public function logout(Request $request)
+        {
+            Auth::logout(); // Cierra la sesión del usuario
+
+            $request->session()->invalidate(); // Invalida la sesión actual por seguridad
+            $request->session()->regenerateToken(); // Regenera el token CSRF para prevenir ataques
+
+            return redirect('/login'); // Te manda directo a la pantalla morada
+        }
 }
