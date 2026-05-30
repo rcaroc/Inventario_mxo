@@ -51,71 +51,81 @@
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item"><a class="nav-link" href="{{ route('home') }}">Inicio</a></li>
 
-                    {{-- FILTRO DE SEGURIDAD: Solo Administradores ven este menú --}}
-                    @if(Auth::check() && strtolower(Auth::user()->rol) === 'administrador')
+                    @auth
+                        @php $userRol = strtolower(Auth::user()->rol); @endphp
+
+                        {{-- 1. USUARIO: Solo Administradores --}}
+                        @if($userRol === 'administrador')
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Usuario</a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="{{ route('usuarios.index') }}">Lista de Usuarios</a></li>
+                                    <li><a class="dropdown-item" href="{{ route('usuarios.create') }}">Crear Usuario</a></li>
+                                </ul>
+                            </li>
+                        @endif
+
+                        {{-- 2. CATÁLOGO Y MOVIMIENTO: Administrador e Inventario (Ventas NO lo ve) --}}
+                        @if($userRol !== 'ventas')
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Catálogo</a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="{{ route('modelos.index') }}">Lista de Modelos</a></li>
+                                    <li><a class="dropdown-item" href="{{ route('modelos.create') }}">Nuevo Modelo</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="{{ route('productos.index') }}">Lista de Productos</a></li>
+                                    <li><a class="dropdown-item" href="{{ route('productos.create') }}">Nuevo Producto</a></li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Movimiento</a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="{{ route('movimientos.entrada') }}">Registro Entrada</a></li>
+                                    <li><a class="dropdown-item" href="{{ route('movimientos.salida') }}">Registro Salida</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="{{ route('movimientos.historial') }}">Historial</a></li>
+                                </ul>
+                            </li>
+                        @endif
+
+                        {{-- 3. REPORTE: Todos los roles (incluyendo Ventas) --}}
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Usuario</a>
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Reporte</a>
                             <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{{ route('usuarios.index') }}">Lista de Usuarios</a></li>
-                                <li><a class="dropdown-item" href="{{ route('usuarios.create') }}">Crear Usuario</a></li>
+                                <li><a class="dropdown-item" href="{{ route('reportes.modelo') }}">Stock por modelo</a></li>
+                                <li><a class="dropdown-item" href="{{ route('reportes.talla') }}">Stock por talla y color</a></li>
                             </ul>
                         </li>
-                    @endif
-
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Catálogo</a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ route('modelos.index') }}">Lista de Modelos</a></li>
-                            <li><a class="dropdown-item" href="{{ route('modelos.create') }}">Nuevo Modelo</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{{ route('productos.index') }}">Lista de Productos</a></li>
-                            <li><a class="dropdown-item" href="{{ route('productos.create') }}">Nuevo Producto</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Movimiento</a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ route('movimientos.entrada') }}">Registro Entrada</a></li>
-                            <li><a class="dropdown-item" href="{{ route('movimientos.salida') }}">Registro Salida</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{{ route('movimientos.historial') }}">Historial</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Reporte</a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ route('reportes.modelo') }}">Stock por modelo</a></li>
-                            <li><a class="dropdown-item" href="{{ route('reportes.talla') }}">Stock por talla y color</a></li>
-                        </ul>
-                    </li>
+                    @endauth
                 </ul>
 
                 {{-- SECCIÓN DINÁMICA DE USUARIO --}}
-                <div class="d-flex align-items-center text-white">
-                    <div class="me-3 text-end">
-                        <small class="d-block text-secondary" style="font-size: 10px; line-height: 1;">Conectado como:</small>
-                        <span class="fw-bold">{{ Auth::user()->usuario_nombre }} {{ Auth::user()->usuario_apellido }}</span>
+                @auth
+                    <div class="d-flex align-items-center text-white">
+                        <div class="me-3 text-end">
+                            <small class="d-block text-secondary" style="font-size: 10px; line-height: 1;">Conectado como:</small>
+                            <span class="fw-bold">{{ Auth::user()->usuario_nombre }} {{ Auth::user()->usuario_apellido }}</span>
+                        </div>
+
+                        @php
+                            $userRol = strtolower(Auth::user()->rol);
+                            $badgeClass = 'badge-ventas';
+                            if($userRol === 'administrador') $badgeClass = 'badge-admin';
+                            if($userRol === 'inventario') $badgeClass = 'badge-inventario';
+                        @endphp
+                        
+                        <span class="{{ $badgeClass }} me-3">
+                            <i class="fas fa-shield-alt me-1"></i> {{ ucfirst(Auth::user()->rol) }}
+                        </span>
+
+                        <form action="{{ route('logout') }}" method="POST" class="m-0">
+                            @csrf
+                            <button type="submit" class="btn btn-sm btn-light fw-bold text-dark" style="border-radius: 20px;">
+                                <i class="fas fa-sign-out-alt"></i> Salir
+                            </button>
+                        </form>
                     </div>
-
-                    {{-- Badge dinámico optimizado contra mayúsculas/minúsculas --}}
-                    @php
-                        $userRol = strtolower(Auth::user()->rol);
-                        $badgeClass = 'badge-ventas'; // Por defecto
-                        if($userRol === 'administrador') $badgeClass = 'badge-admin';
-                        if($userRol === 'inventario') $badgeClass = 'badge-inventario';
-                    @endphp
-                    
-                    <span class="{{ $badgeClass }} me-3">
-                        <i class="fas fa-shield-alt me-1"></i> {{ ucfirst(Auth::user()->rol) }}
-                    </span>
-
-                    <form action="{{ route('logout') }}" method="POST" class="m-0">
-                        @csrf
-                        <button type="submit" class="btn btn-sm btn-light fw-bold text-dark" style="border-radius: 20px;">
-                            <i class="fas fa-sign-out-alt"></i> Salir
-                        </button>
-                    </form>
-                </div>
+                @endauth
             </div>
         </div>
     </nav>
