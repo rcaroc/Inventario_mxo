@@ -32,7 +32,7 @@
         .badge-ventas { background-color: #48c78e !important; color: white !important; padding: 5px 12px; border-radius: 4px; font-size: 0.85rem; font-weight: 500; }
         .badge-inventario { background-color: #ffd54f !important; color: #5d4037 !important; padding: 5px 12px; border-radius: 4px; font-size: 0.85rem; font-weight: 500; }
 
-        /* Estilos específicos para botones de exportación que creará DataTables */
+        /* Estilos específicos para botones de exportación */
         .dt-buttons { margin-bottom: 15px; }
         .btn-export-pdf { background-color: #5dade2 !important; color: white !important; border: none !important; }
         .btn-export-excel { background-color: #48c78e !important; color: white !important; border: none !important; }
@@ -84,11 +84,30 @@
                         </ul>
                     </li>
                 </ul>
+
+                {{-- SECCIÓN DINÁMICA DE USUARIO --}}
                 <div class="d-flex align-items-center text-white">
-                    <span class="badge bg-primary me-2"><i class="fas fa-user"></i> Administrador</span>
-                    <form action="{{ route('logout') }}" method="POST">
+                    <div class="me-3 text-end">
+                        <small class="d-block text-secondary" style="font-size: 10px; line-height: 1;">Conectado como:</small>
+                        <span class="fw-bold">{{ Auth::user()->usuario_nombre }} {{ Auth::user()->usuario_apellido }}</span>
+                    </div>
+
+                    {{-- Badge dinámico según el rol --}}
+                    @php
+                        $badgeClass = 'badge-ventas'; // Default
+                        if(Auth::user()->rol == 'administrador') $badgeClass = 'badge-admin';
+                        if(Auth::user()->rol == 'inventario') $badgeClass = 'badge-inventario';
+                    @endphp
+                    
+                    <span class="{{ $badgeClass }} me-3">
+                        <i class="fas fa-shield-alt me-1"></i> {{ ucfirst(Auth::user()->rol) }}
+                    </span>
+
+                    <form action="{{ route('logout') }}" method="POST" class="m-0">
                         @csrf
-                        <button type="submit" class="btn btn-sm btn-light">Salir</button>
+                        <button type="submit" class="btn btn-sm btn-light fw-bold text-dark" style="border-radius: 20px;">
+                            <i class="fas fa-sign-out-alt"></i> Salir
+                        </button>
                     </form>
                 </div>
             </div>
@@ -99,11 +118,11 @@
         @yield('content')
     </div>
 
-    {{-- SCRIPTS BASE (ORDEN CRÍTICO) --}}
+    {{-- SCRIPTS BASE --}}
     <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
-    {{-- SCRIPTS DE DATATABLES Y EXPORTACIÓN --}}
+    {{-- SCRIPTS DE DATATABLES --}}
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
