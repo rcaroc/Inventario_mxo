@@ -13,6 +13,7 @@ class Stock extends Model
     // Relación inversa: Un stock pertenece a un producto
     public function producto()
     {
-        return $this->belongsTo(Producto::class, 'producto_id');
+        // Añadimos 'producto_id' al final para asegurar la conexión
+        return $this->belongsTo(Producto::class, 'producto_id', 'producto_id');
     }
 }

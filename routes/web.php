@@ -1,12 +1,13 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\LoginController; // Importante añadirlo
+use App\Http\Controllers\LoginController; 
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\ModeloController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\MovimientoController;
 use App\Http\Controllers\ReporteController;
+use App\Http\Controllers\DashboardController;
 
 // ==========================================
 // RUTAS DE AUTENTICACIÓN (ABIERTAS)
