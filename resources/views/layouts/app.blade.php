@@ -50,13 +50,18 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item"><a class="nav-link" href="{{ route('home') }}">Inicio</a></li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Usuario</a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ route('usuarios.index') }}">Lista de Usuarios</a></li>
-                            <li><a class="dropdown-item" href="{{ route('usuarios.create') }}">Crear Usuario</a></li>
-                        </ul>
-                    </li>
+
+                    {{-- FILTRO DE SEGURIDAD: Solo Administradores ven este menú --}}
+                    @if(Auth::check() && strtolower(Auth::user()->rol) === 'administrador')
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Usuario</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ route('usuarios.index') }}">Lista de Usuarios</a></li>
+                                <li><a class="dropdown-item" href="{{ route('usuarios.create') }}">Crear Usuario</a></li>
+                            </ul>
+                        </li>
+                    @endif
+
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Catálogo</a>
                         <ul class="dropdown-menu">
@@ -92,11 +97,12 @@
                         <span class="fw-bold">{{ Auth::user()->usuario_nombre }} {{ Auth::user()->usuario_apellido }}</span>
                     </div>
 
-                    {{-- Badge dinámico según el rol --}}
+                    {{-- Badge dinámico optimizado contra mayúsculas/minúsculas --}}
                     @php
-                        $badgeClass = 'badge-ventas'; // Default
-                        if(Auth::user()->rol == 'administrador') $badgeClass = 'badge-admin';
-                        if(Auth::user()->rol == 'inventario') $badgeClass = 'badge-inventario';
+                        $userRol = strtolower(Auth::user()->rol);
+                        $badgeClass = 'badge-ventas'; // Por defecto
+                        if($userRol === 'administrador') $badgeClass = 'badge-admin';
+                        if($userRol === 'inventario') $badgeClass = 'badge-inventario';
                     @endphp
                     
                     <span class="{{ $badgeClass }} me-3">
