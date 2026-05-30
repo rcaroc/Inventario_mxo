@@ -31,22 +31,25 @@ class UsuarioController extends Controller
      */
 public function store(Request $request)
 {
-    // 1. Validación (Ajustada a los values de tu HTML y nombres de campos)
     $request->validate([
         'usuario_nombre'   => 'required|max:40',
         'usuario_apellido' => 'required|max:40',
         'usuario_usuario'  => 'required|unique:usuario,usuario_usuario|max:20',
-        'usuario_clave'    => 'required|min:6|confirmed', // 'confirmed' busca usuario_clave_confirmation
+        'usuario_clave'    => 'required|min:6|confirmed', 
         'rol'              => 'required', 
+    ], [
+        // Mensajes personalizados
+        'usuario_clave.confirmed' => 'Las contraseñas ingresadas no coinciden.',
+        'usuario_clave.min' => 'La clave debe tener al menos 6 caracteres.',
+        'usuario_usuario.unique' => 'Este nombre de usuario ya está en uso.',
     ]);
 
-    // 2. Crear el usuario
     Usuario::create([
         'usuario_nombre'   => $request->usuario_nombre,
         'usuario_apellido' => $request->usuario_apellido,
         'usuario_usuario'  => $request->usuario_usuario,
-        'usuario_clave'    => bcrypt($request->usuario_clave), // Encriptamos la clave
-        'rol'              => $request->rol, // Guardará "inventario" o "ventas" según tu HTML
+        'usuario_clave'    => bcrypt($request->usuario_clave),
+        'rol'              => $request->rol,
     ]);
 
     return redirect()->route('usuarios.index')->with('success', '¡Usuario creado con éxito!');
