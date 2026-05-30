@@ -13,9 +13,12 @@ use App\Http\Controllers\ReporteController;
 // ==========================================
 
 // Al entrar a la raíz, si no está logueado, muestra el login
-Route::get('/', [LoginController::class, 'showLoginForm'])->name('login');
-Route::get('/login', [LoginController::class, 'showLoginForm']);
+Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
+
+// La raíz simplemente redirige o muestra el login, pero sin apropiarse del nombre
+Route::get('/', [LoginController::class, 'showLoginForm']);
+
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 
