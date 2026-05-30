@@ -34,14 +34,25 @@ class ReporteController extends Controller
         return view('reportes.stock_modelo', compact('reporte', 'totalGeneral'));
     }
 
-    public function stockTalla()
-    {
-        // Traemos todos los productos con su relación de modelo y stock
-        $reporte = Producto::with(['modelo', 'stock'])->get();
+public function stockTalla()
+{
+    // Datos para la tabla
+    $reporte = Producto::with(['modelo', 'stock'])->get();
 
-        // Traemos la lista de modelos para el select del filtro
-        $modelos = Modelo::orderBy('modelo_nombre', 'asc')->get();
+    // Datos para los filtros (Combobox)
+    $modelos = Modelo::orderBy('modelo_nombre', 'asc')->get();
+    
+    // Obtenemos colores y tallas únicos que existan en la BD
+    $colores = Producto::whereNotNull('producto_color')
+                        ->distinct()
+                        ->pluck('producto_color')
+                        ->sort();
 
-        return view('reportes.stock_color_talla', compact('reporte', 'modelos'));
-    }
+    $tallas = Producto::whereNotNull('producto_talla')
+                       ->distinct()
+                       ->pluck('producto_talla')
+                       ->sort();
+
+    return view('reportes.stock_color_talla', compact('reporte', 'modelos', 'colores', 'tallas'));
+}
 }
