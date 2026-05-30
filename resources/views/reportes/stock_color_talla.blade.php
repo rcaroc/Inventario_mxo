@@ -108,31 +108,35 @@
 @section('js')
 <script>
 $(document).ready(function() {
-    // Registrar fuentes para PDF antes de iniciar
+    // 1. Forzar el registro de fuentes de PDFMake inmediatamente
     if (window.pdfMake) {
         pdfMake.vfs = pdfMake.vfs;
     }
 
+    // 2. Inicializar la tabla
     var table = $('#tabla-color-talla').DataTable({
         "order": [[ 0, "asc" ]],
         "language": { "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json" },
-        "dom": 'Brtip', 
+        "dom": 'Brtip', // La 'B' es obligatoria para que el PDF exista en memoria
         "buttons": [
             { 
                 extend: 'excelHtml5', 
                 footer: true,
-                title: 'Reporte Stock por Color y Talla'
+                title: 'Reporte Stock'
             },
             { 
                 extend: 'pdfHtml5', 
                 footer: true,
-                title: 'Reporte Stock por Color y Talla',
+                title: 'Reporte Stock',
+                // Configuraciones de seguridad para evitar bloqueos
+                download: 'download', 
+                orientation: 'portrait',
                 customize: function(doc) {
-                    // Limpia el texto repetido del footer en el PDF
-                    var footerRow = doc.content[1].table.footer[0];
-                    if (footerRow) {
-                        footerRow[1].text = ''; // Columna Color
-                        footerRow[2].text = ''; // Columna Talla
+                    // Limpieza del footer repetido
+                    if (doc.content[1].table.footer) {
+                        var footerRow = doc.content[1].table.footer[0];
+                        footerRow[1].text = ''; 
+                        footerRow[2].text = '';
                     }
                 }
             }
@@ -146,25 +150,33 @@ $(document).ready(function() {
                 }
                 return typeof i === 'number' ? i : 0;
             };
-
             total = api.column(3, { filter: 'applied' }).data().reduce(function (a, b) {
                 return intVal(a) + intVal(b);
             }, 0);
-
             $(api.column(3).footer()).html(total);
         }
     });
 
-    // Acción de botones personalizados
-    $('#btn-excel-custom').on('click', function() {
-        table.button(0).trigger();
+    // 3. OCULTAR LOS BOTONES PLOMOS (De forma segura)
+    // En lugar de borrarlos, los movemos fuera de la vista para que sigan siendo funcionales
+    table.buttons().container().css({
+        'position': 'absolute',
+        'left': '-9999px'
     });
 
-    $('#btn-pdf-custom').on('click', function() {
-        table.button(1).trigger();
+    // 4. VINCULAR TUS BOTONES (Usando disparador por clase)
+    $('#btn-excel-custom').on('click', function(e) {
+        e.preventDefault();
+        $('.buttons-excel').click(); // Simula el clic en el botón oculto
     });
 
-    // Filtros
+    $('#btn-pdf-custom').on('click', function(e) {
+        e.preventDefault();
+        console.log("Iniciando descarga de PDF...");
+        $('.buttons-pdf').click(); // Simula el clic en el botón oculto
+    });
+
+    // 5. Filtros Aplicar / Limpiar
     $('#btn-aplicar').on('click', function() {
         table.column(0).search($('#filtro-modelo').val());
         let color = $('#filtro-color').val();
