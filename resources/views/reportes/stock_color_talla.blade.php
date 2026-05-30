@@ -50,12 +50,17 @@
                 </div>
             </div>
 
-            <div class="mt-4 d-flex align-items-center">
-                <button id="btn-aplicar" class="btn btn-primary px-4 me-2 shadow-sm" style="background-color: #3498db; border:none;">Aplicar</button>
-                <button id="btn-limpiar" class="btn btn-light px-4 border me-auto">Limpiar</button>
-                
-                <div id="wrapper-botones"></div>
-            </div>
+        <div class="mt-4 d-flex align-items-center">
+            <button id="btn-aplicar" class="btn btn-primary px-4 me-2 shadow-sm">Aplicar</button>
+            <button id="btn-limpiar" class="btn btn-light px-4 border me-auto">Limpiar</button>
+            
+            <button id="btn-export-excel-manual" class="btn btn-success me-2 shadow-sm" style="background-color: #48c78e; border:none;">
+                <i class="fas fa-file-excel me-1"></i> Exportar Excel
+            </button>
+            <button id="btn-export-pdf-manual" class="btn btn-primary shadow-sm" style="background-color: #5dade2; border:none;">
+                <i class="fas fa-file-pdf me-1"></i> Exportar PDF
+            </button>
+        </div>
         </div>
     </div>
 
