@@ -7,9 +7,28 @@
             <div class="card-body p-4">
                 <h2 class="h4 mb-4"><i class="fas fa-tachometer-alt me-2"></i> Dashboard</h2>
 
+                {{-- Lógica para definir el color del badge según el rol --}}
+                @php
+                    $badgeClass = 'bg-success'; // Color para Ventas (Verde)
+                    if(Auth::user()->rol == 'administrador') $badgeClass = 'bg-danger'; // Rojo
+                    if(Auth::user()->rol == 'inventario') $badgeClass = 'bg-warning text-dark'; // Amarillo
+                @endphp
+
                 <div class="alert alert-info border-0 shadow-sm" style="background-color: #e7f3ff; border-left: 4px solid #0d6efd !important;">
-                    <div class="mb-2"><i class="fas fa-user"></i> <strong>Bienvenido:</strong> Administrador</div>
-                    <div><i class="fas fa-tag"></i> <strong>Rol:</strong> <span class="badge bg-danger ms-1">Administrador</span></div>
+                    {{-- Nombre dinámico --}}
+                    <div class="mb-2">
+                        <i class="fas fa-user"></i> 
+                        <strong>Bienvenido:</strong> {{ Auth::user()->usuario_nombre }} {{ Auth::user()->usuario_apellido }}
+                    </div>
+                    
+                    {{-- Rol dinámico --}}
+                    <div>
+                        <i class="fas fa-tag"></i> 
+                        <strong>Rol:</strong> 
+                        <span class="badge {{ $badgeClass }} ms-1">
+                            {{ ucfirst(Auth::user()->rol) }}
+                        </span>
+                    </div>
                 </div>
 
                 <div class="mt-4">
