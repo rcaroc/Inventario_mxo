@@ -29,29 +29,31 @@ class UsuarioController extends Controller
     /**
      * 3. GUARDAR NUEVO USUARIO (store)
      */
-    public function store(Request $request)
-    {
-        // Validamos que los datos sean correctos
-        $request->validate([
-            'usuario_nombre'   => 'required|max:40',
-            'usuario_apellido' => 'required|max:40',
-            'usuario_usuario'  => 'required|unique:usuario,usuario_usuario|max:20',
-            'usuario_clave'    => 'required|min:4',
-            'rol'              => 'required'
-        ]);
-
-        // Creamos el registro en la base de datos
-        Usuario::create([
-            'usuario_nombre'   => $request->usuario_nombre,
-            'usuario_apellido' => $request->usuario_apellido,
-            'usuario_usuario'  => $request->usuario_usuario,
-            'usuario_clave'    => Hash::make($request->usuario_clave), // Clave encriptada
-            'rol'              => $request->rol,
-        ]);
-
-        return redirect()->route('usuarios.index')->with('success', 'Usuario creado correctamente.');
+public function store(Request $request)
+{
+    // 1. Validar que el usuario logueado SEA el administrador único
+    // Asumiendo que el rol del admin es 'Administrador'
+    if (auth()->user()->rol !== 'Administrador') {
+        return redirect()->back()->with('error', 'No tienes permiso para crear usuarios.');
     }
 
+    // 2. Validación normal
+    $request->validate([
+        'usuario_nombre' => 'required',
+        'rol' => 'required|in:Encargado de Inventario,Encargado de Ventas', // Solo permite estos dos
+        'password' => 'required|min:8',
+    ]);
+
+    // 3. Crear el usuario
+    Usuario::create([
+        'usuario_nombre' => $request->usuario_nombre,
+        'usuario_apellido' => $request->usuario_apellido,
+        'rol' => $request->rol, // Aquí ya viene filtrado por la validación de arriba
+        'password' => bcrypt($request->password),
+    ]);
+
+    return redirect()->route('usuarios.index')->with('success', 'Usuario creado correctamente.');
+}
     /**
      * 4. MOSTRAR FORMULARIO DE EDICIÓN (edit)
      */
