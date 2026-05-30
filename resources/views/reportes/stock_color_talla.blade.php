@@ -2,7 +2,7 @@
 
 @section('css')
 <style>
-    /* Ocultar botones originales de DataTables (los plomos) */
+    /* Ocultar botones originales de DataTables */
     .dt-buttons {
         display: none !important;
     }
@@ -11,7 +11,6 @@
     .btn-export-pdf { background-color: #5dade2 !important; color: white !important; border: none !important; }
     .form-label { font-size: 0.85rem; margin-bottom: 4px; }
 
-    /* Ajuste visual para la tabla en pantalla */
     #tabla-color-talla th { background-color: #f8f9fa; }
 </style>
 @endsection
@@ -98,7 +97,7 @@
                     <tfoot class="table-light border-top">
                         <tr class="fw-bold">
                             <td colspan="3" class="text-end py-3">Total general</td>
-                            <td class="text-center py-3 fs-5 text-primary">0</td>
+                            <td id="total-sum-val" class="text-center py-3 fs-5 text-primary">0</td>
                         </tr>
                     </tfoot>
                 </table>
@@ -111,7 +110,6 @@
 @section('js')
 <script>
 $(document).ready(function() {
-    // 1. Inicializar la tabla
     var table = $('#tabla-color-talla').DataTable({
         "order": [[ 0, "asc" ]],
         "language": { "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json" },
@@ -124,7 +122,7 @@ $(document).ready(function() {
             },
             { 
                 extend: 'pdfHtml5', 
-                footer: true,
+                footer: false, // CAMBIO CLAVE: Quitamos la herencia automática
                 title: 'Reporte de Stock por Color y Talla',
                 orientation: 'portrait',
                 pageSize: 'A4',
@@ -132,33 +130,33 @@ $(document).ready(function() {
                     columns: [0, 1, 2, 3]
                 },
                 customize: function(doc) {
-                    // Ajustar anchos de columnas para que no se vea apretado
+                    // 1. Forzamos la creación de la fila del footer manualmente
+                    // Obtenemos el valor actual de la suma que calculó DataTable
+                    var totalSuma = $('#total-sum-val').text();
+                    
+                    var footerRowManual = [
+                        { text: 'TOTAL GENERAL', alignment: 'right', bold: true, margin: [0, 5, 0, 5] },
+                        { text: '', margin: [0, 5, 0, 5] },
+                        { text: '', margin: [0, 5, 0, 5] },
+                        { text: totalSuma, alignment: 'center', bold: true, fillColor: '#f8f9fa', margin: [0, 5, 0, 5] }
+                    ];
+                    
+                    // Empujamos la fila al cuerpo de la tabla del PDF
+                    doc.content[1].table.body.push(footerRowManual);
+
+                    // 2. Ajustar anchos
                     doc.content[1].table.widths = ['40%', '20%', '20%', '20%'];
                     
-                    // Estilos generales de la tabla
+                    // 3. Estilos de filas
                     var rowCount = doc.content[1].table.body.length;
                     for (var i = 1; i < rowCount; i++) {
+                        // Alineaciones para Color, Talla y Stock
                         doc.content[1].table.body[i][1].alignment = 'center';
                         doc.content[1].table.body[i][2].alignment = 'center';
                         doc.content[1].table.body[i][3].alignment = 'center';
-                        // Dar padding a las celdas
-                        for (var j = 0; j < 4; j++) {
-                            doc.content[1].table.body[i][j].margin = [5, 5, 5, 5];
-                        }
                     }
 
-                    // Arreglar el Footer en el PDF
-                    if (doc.content[1].table.footer) {
-                        var footerRow = doc.content[1].table.footer[0];
-                        footerRow[0].text = 'TOTAL GENERAL';
-                        footerRow[0].alignment = 'right';
-                        footerRow[1].text = ''; 
-                        footerRow[2].text = '';
-                        footerRow[3].alignment = 'center';
-                        footerRow[3].fillColor = '#f8f9fa';
-                    }
-
-                    // Título del PDF
+                    // 4. Título
                     doc.styles.title = {
                         color: '#2d3748',
                         fontSize: '16',
@@ -183,35 +181,21 @@ $(document).ready(function() {
                 return intVal(a) + intVal(b);
             }, 0);
 
-            $(api.column(3).footer()).html(total);
+            $('#total-sum-val').html(total);
         }
     });
 
-    // 2. Ocultar contenedores de botones originales
-    table.buttons().container().css({
-        'position': 'absolute',
-        'left': '-9999px'
-    });
+    table.buttons().container().css({ 'position': 'absolute', 'left': '-9999px' });
 
-    // 3. Vincular tus botones personalizados
-    $('#btn-excel-custom').on('click', function() {
-        $('.buttons-excel').click();
-    });
+    $('#btn-excel-custom').on('click', function() { $('.buttons-excel').click(); });
+    $('#btn-pdf-custom').on('click', function() { $('.buttons-pdf').click(); });
 
-    $('#btn-pdf-custom').on('click', function() {
-        $('.buttons-pdf').click();
-    });
-
-    // 4. Lógica de Filtros
     $('#btn-aplicar').on('click', function() {
         table.column(0).search($('#filtro-modelo').val());
-        
         let color = $('#filtro-color').val();
         table.column(1).search(color ? '^' + color + '$' : '', true, false);
-        
         let talla = $('#filtro-talla').val();
         table.column(2).search(talla ? '^' + talla + '$' : '', true, false);
-        
         table.draw();
     });
 
