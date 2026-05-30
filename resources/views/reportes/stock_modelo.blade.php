@@ -77,23 +77,27 @@ $(document).ready(function() {
         "footerCallback": function (row, data, start, end, display) {
             var api = this.api();
 
-            // Quitar formato para sumar
+            // Función para convertir texto a número puro
             var intVal = function (i) {
-                return typeof i === 'string' ?
-                    i.replace(/[\$,]/g, '') * 1 :
-                    typeof i === 'number' ? i : 0;
+                if (typeof i === 'string') {
+                    // Quitamos etiquetas HTML (como el <span> rojo) y espacios
+                    let cleaned = i.replace(/<[^>]*>?/gm, '').trim();
+                    return cleaned === '' ? 0 : parseFloat(cleaned);
+                }
+                return typeof i === 'number' ? i : 0;
             };
 
-            // Total de la columna 3 (Stock total)
-            total = api
-                .column(3, { page: 'current'} )
+            // Calcular el total de la columna 3 (Stock total)
+            // Usamos { filter: 'applied' } para que el total cambie si buscas algo
+            var totalPagina = api
+                .column(3, { filter: 'applied' }) 
                 .data()
                 .reduce(function (a, b) {
                     return intVal(a) + intVal(b);
                 }, 0);
 
-            // Actualizar la celda del footer
-            $(api.column(3).footer()).html(total);
+            // Escribir el total en el footer (columna 3)
+            $(api.column(3).footer()).html(totalPagina);
         }
     });
 });
