@@ -35,6 +35,12 @@ class ReporteController extends Controller
 
     public function stockTalla()
     {
-        return view('reportes.stock_talla_color'); // Nombre sugerido para el siguiente reporte
+        // Traemos todos los productos con su relación de modelo y stock
+        $reporte = Producto::with(['modelo', 'stock'])->get();
+
+        // Traemos la lista de modelos para el select del filtro
+        $modelos = Modelo::orderBy('modelo_nombre', 'asc')->get();
+
+        return view('reportes.stock_color_talla', compact('reporte', 'modelos'));
     }
 }
