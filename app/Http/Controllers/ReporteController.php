@@ -3,7 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Modelo;
+use App\Models\Modelo;   // Ya lo tenías
+use App\Models\Producto; // <--- ESTO ES LO QUE FALTA
 use Illuminate\Support\Facades\DB;
 
 class ReporteController extends Controller
