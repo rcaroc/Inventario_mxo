@@ -6,9 +6,6 @@
         <h1 class="fw-bold text-dark mb-0">Reporte de Stock por Modelo</h1>
     </div>
 
-    {{-- Contenedor donde aparecerán los botones de exportación --}}
-    <div id="contenedor-botones" class="mb-3"></div>
-
     <div class="card shadow-sm border-0" style="border-radius: 12px;">
         <div class="card-body p-4">
             <div class="table-responsive">
@@ -35,6 +32,12 @@
                         </tr>
                         @endforeach
                     </tbody>
+                    <tfoot class="table-light border-top">
+                        <tr class="fw-bold text-dark">
+                            <td colspan="3" class="text-end py-3">Total general</td>
+                            <td class="text-center py-3 fs-5 text-primary">0</td> 
+                        </tr>
+                    </tfoot>
                 </table>
             </div>
         </div>
@@ -50,27 +53,47 @@ $(document).ready(function() {
         "language": {
             "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json"
         },
-        // Añadimos 'B' al inicio para que renderice los Buttons
-        "dom": '<"d-flex justify-content-between align-items-center"Bf>rt<"d-flex justify-content-between"ip>', 
+        // 'B' renderiza los botones, 'f' el buscador
+        "dom": '<"d-flex justify-content-between align-items-center mb-3"Bf>rt<"d-flex justify-content-between"ip>', 
         "buttons": [
             {
                 extend: 'excelHtml5',
                 text: '<i class="fas fa-file-excel me-1"></i> Exportar Excel',
                 className: 'btn-export-excel shadow-sm me-2',
-                title: 'Reporte Stock por Modelo'
+                title: 'Reporte Stock por Modelo',
+                footer: true // Para que el total salga en el Excel
             },
             {
                 extend: 'pdfHtml5',
                 text: '<i class="fas fa-file-pdf me-1"></i> Exportar PDF',
                 className: 'btn-export-pdf shadow-sm',
-                title: 'Reporte Stock por Modelo'
+                title: 'Reporte Stock por Modelo',
+                footer: true // Para que el total salga en el PDF
             }
-        ]
-    });
+        ],
+        // FUNCIÓN PARA SUMAR EL TOTAL AUTOMÁTICAMENTE
+        "footerCallback": function (row, data, start, end, display) {
+            var api = this.api();
 
-    // Esta línea ya no es necesaria si usamos la 'B' en el dom, 
-    // pero la dejamos comentada por si quieres moverlos manualmente después.
-    // table.buttons().container().appendTo('#contenedor-botones');
+            // Quitar formato para sumar
+            var intVal = function (i) {
+                return typeof i === 'string' ?
+                    i.replace(/[\$,]/g, '') * 1 :
+                    typeof i === 'number' ? i : 0;
+            };
+
+            // Total de la columna 3 (Stock total)
+            total = api
+                .column(3, { page: 'current'} )
+                .data()
+                .reduce(function (a, b) {
+                    return intVal(a) + intVal(b);
+                }, 0);
+
+            // Actualizar la celda del footer
+            $(api.column(3).footer()).html(total);
+        }
+    });
 });
 </script>
 @endsection
