@@ -106,67 +106,53 @@
 @section('js')
 <script>
 $(document).ready(function() {
-    // ESTA LÍNEA ES EL TRUCO: Registra las fuentes manualmente antes de la tabla
-    if (typeof pdfMake !== 'undefined') {
-        pdfMake.vfs = pdfMake.vfs; 
+    // Forzar registro de fuentes para PDFMake
+    if (window.pdfMake) {
+        pdfMake.vfs = pdfMake.vfs;
     }
 
     var table = $('#tabla-color-talla').DataTable({
         "order": [[ 0, "asc" ]],
         "language": { "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json" },
-        "dom": 'Brtip', // Mantenemos la B para que existan los botones
+        "dom": 'Brtip', 
         "buttons": [
             { 
                 extend: 'excelHtml5', 
-                title: 'Reporte Stock',
-                footer: true 
+                footer: true,
+                title: 'Reporte Stock por Color y Talla'
             },
             { 
                 extend: 'pdfHtml5', 
-                title: 'Reporte Stock',
                 footer: true,
-                exportOptions: { columns: ':visible' },
+                title: 'Reporte Stock por Color y Talla',
+                orientation: 'portrait',
+                pageSize: 'A4',
+                // Si se queda cargando, probamos sin el customize primero o simplificado
                 customize: function(doc) {
-                    // Limpieza de footer repetido
-                    var footerRow = doc.content[1].table.footer[0];
-                    if (footerRow) {
-                        footerRow[1].text = ''; 
-                        footerRow[2].text = ''; 
-                    }
+                    doc.content[1].table.widths = ['*', '*', '*', '*'];
                 }
             }
-        ],
-        "footerCallback": function (row, data, start, end, display) {
-            var api = this.api();
-            var intVal = function (i) {
-                if (typeof i === 'string') {
-                    let cleaned = i.replace(/<[^>]*>?/gm, '').trim();
-                    return cleaned === '' ? 0 : parseFloat(cleaned);
-                }
-                return typeof i === 'number' ? i : 0;
-            };
-            total = api.column(3, { filter: 'applied' }).data().reduce(function (a, b) {
-                return intVal(a) + intVal(b);
-            }, 0);
-            $(api.column(3).footer()).html(total);
-        }
+        ]
     });
 
-    // Ocultamos los botones que DataTables crea automáticamente (los feos)
-    table.buttons().container().addClass('d-none');
+    // Ocultamos los botones automáticos de Datatables
+    table.buttons().container().hide();
 
-    // BOTONES PERSONALIZADOS (Los que tú tienes en el HTML)
-    // Buscamos el botón de Excel (índice 0) y PDF (índice 1)
-    $('#btn-export-excel-manual').on('click', function() {
+    // Vinculación de tus botones manuales (Asegúrate que los IDs coincidan)
+    $('#btn-export-excel-manual').on('click', function(e) {
+        e.preventDefault();
         table.button(0).trigger();
     });
 
-    $('#btn-export-pdf-manual').on('click', function() {
-        console.log("Generando PDF..."); // Si ves esto en F12, el botón está vivo
-        table.button(1).trigger();
+    $('#btn-export-pdf-manual').on('click', function(e) {
+        e.preventDefault();
+        // Usamos una pequeña pausa para asegurar que no bloquee el hilo del navegador
+        setTimeout(function(){
+            table.button(1).trigger();
+        }, 100);
     });
 
-    // Filtros Aplicar / Limpiar
+    // Lógica de Filtros Aplicar / Limpiar
     $('#btn-aplicar').on('click', function() {
         table.column(0).search($('#filtro-modelo').val());
         let color = $('#filtro-color').val();
