@@ -86,11 +86,12 @@ class MovimientoController extends Controller
 
     public function historial()
     {
-        // Cargamos las relaciones para que no haga una consulta por cada fila
-        $movimientos = Movimiento::with(['producto', 'usuario'])
-                        ->orderBy('movimiento_id', 'desc') // Los más recientes primero
+        // Usamos eager loading para cargar las relaciones.
+        // Añadimos 'latest()' para que el historial muestre lo más nuevo primero por defecto.
+        $movimientos = Movimiento::with(['producto.modelo', 'usuario'])
+                        ->latest('movimiento_id') 
                         ->get();
-                        
+        
         return view('movimientos.historial', compact('movimientos'));
     }
 }
