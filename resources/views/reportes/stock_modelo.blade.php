@@ -3,11 +3,10 @@
 @section('css')
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
 <style>
-    .btn-export-pdf { background-color: #5dade2; color: white; border-radius: 4px; border: none; padding: 6px 15px; }
-    .btn-export-excel { background-color: #52be80; color: white; border-radius: 4px; border: none; padding: 6px 15px; }
-    .btn-export-pdf:hover { background-color: #3498db; color: white; }
-    .btn-export-excel:hover { background-color: #27ae60; color: white; }
-    table.dataTable thead th { border-bottom: 1px solid #dee2e6 !important; }
+    .btn-export-pdf { background-color: #5dade2; color: white; border-radius: 4px; border: none; padding: 7px 18px; font-size: 14px; font-weight: 500; }
+    .btn-export-excel { background-color: #48c78e; color: white; border-radius: 4px; border: none; padding: 7px 18px; font-size: 14px; font-weight: 500; }
+    .btn-export-pdf:hover { background-color: #3498db; }
+    .btn-export-excel:hover { background-color: #3ead76; }
 </style>
 @endsection
 
@@ -18,40 +17,44 @@
     </div>
 
     <div class="mb-4">
-        <button class="btn-export-pdf me-2"><i class="fas fa-file-pdf"></i> Exportar PDF</button>
-        <button class="btn-export-excel"><i class="fas fa-file-excel"></i> Exportar Excel</button>
+        <button class="btn-export-pdf me-2 shadow-sm"><i class="fas fa-file-pdf me-1"></i> Exportar PDF</button>
+        <button class="btn-export-excel shadow-sm"><i class="fas fa-file-excel me-1"></i> Exportar Excel</button>
     </div>
 
     <div class="card shadow-sm border-0" style="border-radius: 12px;">
         <div class="card-body p-4">
-            <table id="tabla-reporte-modelo" class="table table-hover align-middle">
-                <thead class="table-light">
-                    <tr>
-                        <th>Modelo</th>
-                        <th>Ubicación</th>
-                        <th class="text-center">Productos</th>
-                        <th class="text-center">Stock total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($reporte as $item)
-                    <tr>
-                        <td class="fw-bold">{{ $item->modelo_nombre }}</td>
-                        <td class="text-muted">{{ $item->ubicacion ?? '---' }}</td>
-                        <td class="text-center">{{ $item->productos_count }}</td>
-                        <td class="text-center fw-bold {{ $item->stock_total <= 5 ? 'text-danger' : '' }}">
-                            {{ $item->stock_total ?? 0 }}
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-                <tfoot class="border-top">
-                    <tr class="fw-bold">
-                        <td colspan="3" class="text-end">Total general</td>
-                        <td class="text-center text-primary fs-5">{{ $totalGeneral }}</td>
-                    </tr>
-                </tfoot>
-            </table>
+            <div class="table-responsive">
+                <table id="tabla-reporte-modelo" class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Modelo</th>
+                            <th>Ubicación</th>
+                            <th class="text-center">Productos</th>
+                            <th class="text-center">Stock total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($reporte as $item)
+                        <tr>
+                            <td class="fw-bold text-dark">{{ $item->modelo_nombre }}</td>
+                            <td class="text-muted">{{ $item->ubicacion ?? '---' }}</td>
+                            <td class="text-center">{{ $item->productos_count }}</td>
+                            <td class="text-center fw-bold">
+                                <span class="{{ $item->stock_total <= 0 ? 'text-danger' : 'text-dark' }}">
+                                    {{ $item->stock_total ?? 0 }}
+                                </span>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                    <tfoot class="border-top">
+                        <tr class="fw-bold">
+                            <td colspan="3" class="text-end py-3">Total general</td>
+                            <td class="text-center py-3 fs-5 text-primary">{{ $totalGeneral }}</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
         </div>
     </div>
 </div>
@@ -65,15 +68,12 @@
 <script>
     $(document).ready(function() {
         $('#tabla-reporte-modelo').DataTable({
-            "pageLength": 10,
-            "order": [[ 3, "desc" ]], // Ordenar por Stock Total (columna 3) de mayor a menor
+            "order": [[ 3, "desc" ]], // Ordenar por Stock total de mayor a menor
             "language": {
                 "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json"
             },
-            "drawCallback": function( settings ) {
-                // Esto es para que el pie de página (footer) no se pierda al filtrar
-                console.log('Tabla redibujada');
-            }
+            "pageLength": 10,
+            "dom": '<"d-flex justify-content-between align-items-center mb-3"lf>rtip' 
         });
     });
 </script>
