@@ -101,50 +101,34 @@
 @section('js')
 <script>
 $(document).ready(function() {
-    // Inicializar DataTable
+    // 1. Inicializar DataTable
     var table = $('#tabla-color-talla').DataTable({
         "order": [[ 0, "asc" ]],
         "language": {
             "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json"
         },
-        // Ocultamos el dom de botones nativos 'B' porque usaremos los personalizados
-        "dom": 'rt<"d-flex justify-content-between"ip>', 
+        // 'B' debe estar en el dom para que los botones existan, aunque los ocultemos con CSS
+        "dom": '<"d-none"B>rt<"d-flex justify-content-between"ip>', 
         "buttons": [
-                { 
-                    extend: 'excelHtml5', 
-                    title: 'Reporte Stock por Color y Talla',
-                    footer: true,
-                    customize: function(xlsx) {
-                        var sheet = xlsx.xl.worksheets['sheet1.xml'];
-                        // Esto limpia las celdas repetidas del footer en el Excel
-                        // para que solo quede el texto en la primera y el total en la última
-                        $('row:last c', sheet).each(function(index) {
-                            if (index > 0 && index < 3) {
-                                $(this).attr('t', 'inlineStr');
-                                $(this).find('is').remove();
-                                $(this).append('<is><t></t></is>');
-                            }
-                        });
-                    }
-                },
-                { 
-                    extend: 'pdfHtml5', 
-                    title: 'Reporte Stock por Color y Talla',
-                    footer: true,
-                    customize: function(doc) {
-                        // Modificamos el cuerpo del PDF para limpiar el footer repetido
-                        var footerRow = doc.content[1].table.footer[0];
-                        if (footerRow) {
-                            footerRow[1].text = ''; // Limpia "Total general" de la columna Color
-                            footerRow[2].text = ''; // Limpia "Total general" de la columna Talla
-                        }
-                        
-                        // Estilo para que el footer resalte en el PDF
-                        doc.styles.tableFooter.fillColor = '#f8f9fa';
-                        doc.styles.tableFooter.alignment = 'center';
+            { 
+                extend: 'excelHtml5', 
+                title: 'Reporte Stock por Color y Talla',
+                footer: true 
+            },
+            { 
+                extend: 'pdfHtml5', 
+                title: 'Reporte Stock por Color y Talla',
+                footer: true,
+                customize: function(doc) {
+                    // Limpieza del footer para que no se repita "Total general"
+                    var footerRow = doc.content[1].table.footer[0];
+                    if (footerRow) {
+                        footerRow[1].text = ''; 
+                        footerRow[2].text = ''; 
                     }
                 }
-            ],
+            }
+        ],
         "footerCallback": function (row, data, start, end, display) {
             var api = this.api();
             var intVal = function (i) {
@@ -163,19 +147,13 @@ $(document).ready(function() {
         }
     });
 
-    // Filtros personalizados
+    // 2. Filtros de Aplicar y Limpiar
     $('#btn-aplicar').on('click', function() {
-        // Modelo (Columna 0)
         table.column(0).search($('#filtro-modelo').val());
-        
-        // Color (Columna 1) - Búsqueda exacta
         let color = $('#filtro-color').val();
         table.column(1).search(color ? '^' + color + '$' : '', true, false);
-        
-        // Talla (Columna 2) - Búsqueda exacta
         let talla = $('#filtro-talla').val();
         table.column(2).search(talla ? '^' + talla + '$' : '', true, false);
-        
         table.draw();
     });
 
@@ -184,14 +162,25 @@ $(document).ready(function() {
         table.columns().search('').draw();
     });
 
-    // Crear y vincular botones de exportación estilo imagen del usuario
+    // 3. BOTONES DE EXPORTACIÓN (Conexión forzada)
+    // Creamos los botones visuales
     let btnExcel = $('<button class="btn btn-export-excel me-2 shadow-sm"><i class="fas fa-file-excel me-1"></i> Exportar Excel</button>');
     let btnPdf = $('<button class="btn btn-export-pdf shadow-sm"><i class="fas fa-file-pdf me-1"></i> Exportar PDF</button>');
 
-    btnExcel.on('click', function() { table.button(0).trigger(); });
-    btnPdf.on('click', function() { table.button(1).trigger(); });
+    // Acción para Excel (Botón 0 de la lista)
+    btnExcel.on('click', function(e) {
+        e.preventDefault();
+        table.button(0).trigger();
+    });
 
-    $('#wrapper-botones').append(btnExcel).append(btnPdf);
+    // Acción para PDF (Botón 1 de la lista)
+    btnPdf.on('click', function(e) {
+        e.preventDefault();
+        table.button(1).trigger();
+    });
+
+    // Agregarlos al div vacío que tienes arriba
+    $('#wrapper-botones').empty().append(btnExcel).append(btnPdf);
 });
 </script>
 @endsection
