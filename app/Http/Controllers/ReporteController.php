@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Modelo;   // Ya lo tenías
 use App\Models\Producto; // <--- ESTO ES LO QUE FALTA
 use Illuminate\Support\Facades\DB;
-
+/**hola */
 class ReporteController extends Controller
 {
     /**
