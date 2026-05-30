@@ -30,7 +30,6 @@
                 <label class="form-label fw-bold text-dark">Rol</label>
                 <select name="rol" class="form-select form-select-lg border-2" style="border-radius: 8px; background-color: #f8f9fa;" required>
                     <option value="" selected disabled>Seleccione un rol</option>
-                    <option value="administrador">Administrador</option>
                     <option value="inventario">Encargado de Inventario</option>
                     <option value="ventas">Encargado de Ventas</option>
                 </select>
