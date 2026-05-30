@@ -20,27 +20,31 @@ class LoginController extends Controller
     /**
      * Procesa el intento de login
      */
-    public function login(Request $request) 
-    {
-        // 1. Validamos los datos que vienen del formulario (name y password)
-        $credentials = $request->validate([
-            'name'     => ['required', 'string'],
-            'password' => ['required', 'string'],
-        ]);
+public function login(Request $request)
+{
+    // Validamos lo que viene del formulario
+    $request->validate([
+        'name'     => ['required', 'string'],
+        'password' => ['required', 'string'],
+    ]);
 
-        // 2. Intentamos autenticar usando la columna 'name' de tu tabla users
-        if (Auth::attempt($credentials)) {
-            $request->session()->regenerate();
-            
-            // Redirige a la ruta 'home' (tu vista inicio)
-            return redirect()->intended('home');
-        }
+    // Intentamos loguear usando tus columnas personalizadas
+    // 'usuario_usuario' es la columna de la DB
+    // 'usuario_clave' se maneja automáticamente por el método getAuthPassword que pusimos arriba
+    $credentials = [
+        'usuario_usuario' => $request->name, 
+        'password'        => $request->password
+    ];
 
-        // 3. Si falla, regresa con error al campo 'name'
-        return back()->withErrors([
-            'name' => 'Las credenciales no coinciden con nuestros registros.',
-        ])->withInput();
+    if (Auth::attempt($credentials)) {
+        $request->session()->regenerate();
+        return redirect()->intended('home');
     }
+
+    return back()->withErrors([
+        'name' => 'Las credenciales no coinciden con nuestros registros.',
+    ])->withInput();
+}
 
     /**
      * Cierra la sesión y redirige al login morado

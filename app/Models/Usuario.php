@@ -2,26 +2,34 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 
-class Usuario extends Model
+class Usuario extends Authenticatable
 {
-    // Le decimos el nombre exacto de tu tabla
-    protected $table = 'usuario'; 
+    use Notifiable;
 
-    // Le decimos cuál es tu llave primaria personalizada
-    protected $primaryKey = 'usuario_id'; 
+    protected $table = 'usuario'; // Tu tabla se llama 'usuario'
+    protected $primaryKey = 'usuario_id'; // Tu clave primaria personalizada
 
-    // Campos que permitimos que se guarden desde el formulario
     protected $fillable = [
-        'usuario_nombre', 
-        'usuario_apellido', 
-        'usuario_usuario', 
-        'usuario_clave', 
-        'rol'
+        'usuario_nombre',
+        'usuario_apellido',
+        'usuario_usuario',
+        'usuario_clave',
+        'rol',
     ];
 
-    // Si no usas los campos created_at y updated_at, pon esto en false. 
-    // Pero como tu migración los tiene, déjalo así o bórralo.
-    public $timestamps = true;
+    protected $hidden = [
+        'usuario_clave', // Ocultar la clave en consultas
+    ];
+
+    /**
+     * IMPORTANTE: Laravel busca 'password' por defecto. 
+     * Con esto le decimos que use 'usuario_clave'.
+     */
+    public function getAuthPassword()
+    {
+        return $this->usuario_clave;
+    }
 }
