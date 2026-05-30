@@ -2,15 +2,26 @@
 
 @section('content')
 <div class="container-fluid">
-    {{-- Encabezado con Botón de Salida --}}
+    {{-- Encabezado con Botones de Acción --}}
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h3 class="fw-bold text-dark mb-0">Panel de Control</h3>
-        <form action="{{ route('logout') }}" method="POST">
-            @csrf
-            <button type="submit" class="btn btn-danger btn-sm shadow-sm px-3">
-                <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
-            </button>
-        </form>
+        
+        <div class="d-flex gap-2">
+            {{-- BOTÓN PROTEGIDO: Solo el administrador puede verlo --}}
+            @if(auth()->check() && strtolower(auth()->user()->rol) === 'administrador')
+                <a href="{{ route('usuarios.index') }}" class="btn btn-primary btn-sm shadow-sm px-3 d-flex align-items-center">
+                    <i class="fas fa-users-cog me-2"></i> Gestionar Usuarios
+                </a>
+            @endif
+
+            {{-- Botón de Salida --}}
+            <form action="{{ route('logout') }}" method="POST">
+                @csrf
+                <button type="submit" class="btn btn-danger btn-sm shadow-sm px-3">
+                    <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
+                </button>
+            </form>
+        </div>
     </div>
 
     {{-- Fila de Tarjetas de Estadísticas --}}
