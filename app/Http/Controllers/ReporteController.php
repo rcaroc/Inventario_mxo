@@ -13,28 +13,28 @@ class ReporteController extends Controller
      */
     public function stockModelo()
     {
-        // Traemos modelos, contamos sus variantes y sumamos el stock total
+        // 1. Obtenemos los modelos y contamos sus productos usando la relación hasMany
         $reporte = Modelo::withCount('productos')
             ->get()
             ->map(function ($modelo) {
+                // 2. Sumamos el stock de la tabla 'stock' uniendo con 'producto'
                 $modelo->stock_total = DB::table('stock')
                     ->join('producto', 'stock.producto_id', '=', 'producto.producto_id')
                     ->where('producto.modelo_id', $modelo->modelo_id)
-                    ->sum('cantidad');
+                    ->sum('stock.cantidad'); // Especificamos tabla.columna por seguridad
+                
                 return $modelo;
             });
 
+        // 3. Calculamos el total general de todas las filas
         $totalGeneral = $reporte->sum('stock_total');
 
-        return view('reportes.modelo', compact('reporte', 'totalGeneral'));
+        // 4. IMPORTANTE: Apuntamos al nombre de tu archivo 'stock_modelo'
+        return view('reportes.stock_modelo', compact('reporte', 'totalGeneral'));
     }
 
-    /**
-     * Reporte de Stock por Talla y Color (Estructura base)
-     */
     public function stockTalla()
     {
-        // Por ahora lo dejamos simple para que no de error la ruta
-        return view('reportes.talla');
+        return view('reportes.stock_talla_color'); // Nombre sugerido para el siguiente reporte
     }
 }
