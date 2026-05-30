@@ -101,26 +101,28 @@
 @section('js')
 <script>
 $(document).ready(function() {
-    // 1. Inicializar DataTable
+    // ESTA LÍNEA ES EL TRUCO: Registra las fuentes manualmente antes de la tabla
+    if (typeof pdfMake !== 'undefined') {
+        pdfMake.vfs = pdfMake.vfs; 
+    }
+
     var table = $('#tabla-color-talla').DataTable({
         "order": [[ 0, "asc" ]],
-        "language": {
-            "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json"
-        },
-        // 'B' debe estar en el dom para que los botones existan, aunque los ocultemos con CSS
-        "dom": '<"d-none"B>rt<"d-flex justify-content-between"ip>', 
+        "language": { "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json" },
+        "dom": 'Brtip', // Mantenemos la B para que existan los botones
         "buttons": [
             { 
                 extend: 'excelHtml5', 
-                title: 'Reporte Stock por Color y Talla',
+                title: 'Reporte Stock',
                 footer: true 
             },
             { 
                 extend: 'pdfHtml5', 
-                title: 'Reporte Stock por Color y Talla',
+                title: 'Reporte Stock',
                 footer: true,
+                exportOptions: { columns: ':visible' },
                 customize: function(doc) {
-                    // Limpieza del footer para que no se repita "Total general"
+                    // Limpieza de footer repetido
                     var footerRow = doc.content[1].table.footer[0];
                     if (footerRow) {
                         footerRow[1].text = ''; 
@@ -138,16 +140,28 @@ $(document).ready(function() {
                 }
                 return typeof i === 'number' ? i : 0;
             };
-
             total = api.column(3, { filter: 'applied' }).data().reduce(function (a, b) {
                 return intVal(a) + intVal(b);
             }, 0);
-
             $(api.column(3).footer()).html(total);
         }
     });
 
-    // 2. Filtros de Aplicar y Limpiar
+    // Ocultamos los botones que DataTables crea automáticamente (los feos)
+    table.buttons().container().addClass('d-none');
+
+    // BOTONES PERSONALIZADOS (Los que tú tienes en el HTML)
+    // Buscamos el botón de Excel (índice 0) y PDF (índice 1)
+    $('#btn-export-excel-manual').on('click', function() {
+        table.button(0).trigger();
+    });
+
+    $('#btn-export-pdf-manual').on('click', function() {
+        console.log("Generando PDF..."); // Si ves esto en F12, el botón está vivo
+        table.button(1).trigger();
+    });
+
+    // Filtros Aplicar / Limpiar
     $('#btn-aplicar').on('click', function() {
         table.column(0).search($('#filtro-modelo').val());
         let color = $('#filtro-color').val();
@@ -161,26 +175,6 @@ $(document).ready(function() {
         $('#filtro-modelo, #filtro-color, #filtro-talla').val('');
         table.columns().search('').draw();
     });
-
-    // 3. BOTONES DE EXPORTACIÓN (Conexión forzada)
-    // Creamos los botones visuales
-    let btnExcel = $('<button class="btn btn-export-excel me-2 shadow-sm"><i class="fas fa-file-excel me-1"></i> Exportar Excel</button>');
-    let btnPdf = $('<button class="btn btn-export-pdf shadow-sm"><i class="fas fa-file-pdf me-1"></i> Exportar PDF</button>');
-
-    // Acción para Excel (Botón 0 de la lista)
-    btnExcel.on('click', function(e) {
-        e.preventDefault();
-        table.button(0).trigger();
-    });
-
-    // Acción para PDF (Botón 1 de la lista)
-    btnPdf.on('click', function(e) {
-        e.preventDefault();
-        table.button(1).trigger();
-    });
-
-    // Agregardlos al div vacío que tienes arriba
-    $('#wrapper-botones').empty().append(btnExcel).append(btnPdf);
 });
 </script>
 @endsection
