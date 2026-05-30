@@ -7,43 +7,73 @@
         <p class="text-muted fs-5">Nuevo usuario</p>
     </div>
 
+    {{-- Alerta superior opcional para ver todos los errores juntos --}}
+    @if ($errors->any())
+        <div class="alert alert-danger shadow-sm mb-4" style="border-radius: 8px;">
+            <ul class="mb-0">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     <form action="{{ route('usuarios.store') }}" method="POST">
         @csrf
         
         <div class="row g-4">
+            {{-- Nombres --}}
             <div class="col-md-6">
                 <label class="form-label fw-bold text-dark">Nombres</label>
-                <input type="text" name="usuario_nombre" class="form-control form-control-lg border-2" placeholder="Ej: Juan" style="border-radius: 8px; background-color: #f8f9fa;" required>
+                <input type="text" name="usuario_nombre" value="{{ old('usuario_nombre') }}" 
+                    class="form-control form-control-lg border-2 @error('usuario_nombre') is-invalid @enderror" 
+                    placeholder="Ej: Juan" style="border-radius: 8px; background-color: #f8f9fa;">
             </div>
 
+            {{-- Apellidos --}}
             <div class="col-md-6">
                 <label class="form-label fw-bold text-dark">Apellidos</label>
-                <input type="text" name="usuario_apellido" class="form-control form-control-lg border-2" placeholder="Ej: Pérez" style="border-radius: 8px; background-color: #f8f9fa;" required>
+                <input type="text" name="usuario_apellido" value="{{ old('usuario_apellido') }}" 
+                    class="form-control form-control-lg border-2 @error('usuario_apellido') is-invalid @enderror" 
+                    placeholder="Ej: Pérez" style="border-radius: 8px; background-color: #f8f9fa;">
             </div>
 
+            {{-- Usuario --}}
             <div class="col-md-6">
                 <label class="form-label fw-bold text-dark">Usuario</label>
-                <input type="text" name="usuario_usuario" class="form-control form-control-lg border-2" placeholder="Administrador" style="border-radius: 8px; background-color: #f8f9fa;" required>
+                <input type="text" name="usuario_usuario" value="{{ old('usuario_usuario') }}" 
+                    class="form-control form-control-lg border-2 @error('usuario_usuario') is-invalid @enderror" 
+                    placeholder="Administrador" style="border-radius: 8px; background-color: #f8f9fa;">
             </div>
 
+            {{-- Rol --}}
             <div class="col-md-6">
                 <label class="form-label fw-bold text-dark">Rol</label>
-                <select name="rol" class="form-select form-select-lg border-2" style="border-radius: 8px; background-color: #f8f9fa;" required>
+                <select name="rol" class="form-select form-select-lg border-2 @error('rol') is-invalid @enderror" style="border-radius: 8px; background-color: #f8f9fa;">
                     <option value="" selected disabled>Seleccione un rol</option>
-                    <option value="inventario">Encargado de Inventario</option>
-                    <option value="ventas">Encargado de Ventas</option>
+                    <option value="inventario" {{ old('rol') == 'inventario' ? 'selected' : '' }}>Encargado de Inventario</option>
+                    <option value="ventas" {{ old('rol') == 'ventas' ? 'selected' : '' }}>Encargado de Ventas</option>
                 </select>
-                <div class="form-text text-muted small mt-1">Define los permisos del usuario</div>
             </div>
 
+            {{-- Clave --}}
             <div class="col-md-6">
                 <label class="form-label fw-bold text-dark">Clave</label>
-                <input type="password" name="usuario_clave" class="form-control form-control-lg border-2" value="........" style="border-radius: 8px; background-color: #f8f9fa;" required>
+                <input type="password" name="usuario_clave" 
+                    class="form-control form-control-lg border-2 @error('usuario_clave') is-invalid @enderror" 
+                    placeholder="Mínimo 6 caracteres" style="border-radius: 8px; background-color: #f8f9fa;">
+                @error('usuario_clave')
+                    <div class="invalid-feedback fw-bold">{{ $message }}</div>
+                @enderror
             </div>
 
+            {{-- Repetir clave --}}
             <div class="col-md-6">
                 <label class="form-label fw-bold text-dark">Repetir clave</label>
-                <input type="password" name="usuario_clave_confirmation" class="form-control form-control-lg border-2" placeholder="Repite la contraseña" style="border-radius: 8px; background-color: #f8f9fa;" required>
+                <input type="password" name="usuario_clave_confirmation" 
+                    class="form-control form-control-lg border-2" 
+                    placeholder="Repite la contraseña" style="border-radius: 8px; background-color: #f8f9fa;">
+                <div class="form-text">Debe coincidir exactamente con la clave de arriba.</div>
             </div>
         </div>
 
