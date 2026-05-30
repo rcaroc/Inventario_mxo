@@ -110,17 +110,41 @@ $(document).ready(function() {
         // Ocultamos el dom de botones nativos 'B' porque usaremos los personalizados
         "dom": 'rt<"d-flex justify-content-between"ip>', 
         "buttons": [
-            { 
-                extend: 'excelHtml5', 
-                title: 'Reporte Stock por Color y Talla',
-                footer: true 
-            },
-            { 
-                extend: 'pdfHtml5', 
-                title: 'Reporte Stock por Color y Talla',
-                footer: true 
-            }
-        ],
+                { 
+                    extend: 'excelHtml5', 
+                    title: 'Reporte Stock por Color y Talla',
+                    footer: true,
+                    customize: function(xlsx) {
+                        var sheet = xlsx.xl.worksheets['sheet1.xml'];
+                        // Esto limpia las celdas repetidas del footer en el Excel
+                        // para que solo quede el texto en la primera y el total en la última
+                        $('row:last c', sheet).each(function(index) {
+                            if (index > 0 && index < 3) {
+                                $(this).attr('t', 'inlineStr');
+                                $(this).find('is').remove();
+                                $(this).append('<is><t></t></is>');
+                            }
+                        });
+                    }
+                },
+                { 
+                    extend: 'pdfHtml5', 
+                    title: 'Reporte Stock por Color y Talla',
+                    footer: true,
+                    customize: function(doc) {
+                        // Modificamos el cuerpo del PDF para limpiar el footer repetido
+                        var footerRow = doc.content[1].table.footer[0];
+                        if (footerRow) {
+                            footerRow[1].text = ''; // Limpia "Total general" de la columna Color
+                            footerRow[2].text = ''; // Limpia "Total general" de la columna Talla
+                        }
+                        
+                        // Estilo para que el footer resalte en el PDF
+                        doc.styles.tableFooter.fillColor = '#f8f9fa';
+                        doc.styles.tableFooter.alignment = 'center';
+                    }
+                }
+            ],
         "footerCallback": function (row, data, start, end, display) {
             var api = this.api();
             var intVal = function (i) {
