@@ -1,18 +1,25 @@
+<?php
+
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\URL; // <-- IMPORTANTE: Añade esta línea
+use Illuminate\Support\Facades\URL;
 
 class AppServiceProvider extends ServiceProvider
 {
+    /**
+     * Register any application services.
+     */
     public function register(): void
     {
         //
     }
 
+    /**
+     * Bootstrap any application services.
+     */
     public function boot(): void
     {
-        // Si el entorno no es local (es decir, está en Render), fuerza HTTPS
         if (config('app.env') !== 'local') {
             URL::forceScheme('https');
         }
