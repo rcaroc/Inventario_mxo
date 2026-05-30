@@ -6,41 +6,39 @@ use Illuminate\Http\Request;
 use App\Models\Producto;
 use App\Models\Stock;
 use App\Models\Movimiento;
-use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        // 1. Total de productos registrados
+        // 1. Conteos básicos
         $totalProductos = Producto::count();
-
-        // 2. Conteo de Stock Bajo (menos de 5 unidades)
         $stockBajo = Stock::where('cantidad', '<', 5)->count();
 
-        // 3. Movimientos del día (usando try-catch para evitar caídas si la tabla está vacía)
         try {
-            $hoy = Carbon::today();
-            
-            // Contar entradas y salidas de hoy
-            $entradasHoy = Movimiento::where('movimiento_tipo', 'Entrada')
-                                     ->whereDate('created_at', $hoy)
-                                     ->count();
-                                     
-            $salidasHoy = Movimiento::where('movimiento_tipo', 'Salida')
-                                    ->whereDate('created_at', $hoy)
-                                    ->count();
+            // 2. Traer conteos de movimientos (Total histórico para asegurar que no salga 0)
+            // Agrupamos por el campo 'tipo' que tienes en tu modelo Movimiento
+            $movimientosStats = Movimiento::select('tipo', DB::raw('count(*) as total'))
+                ->groupBy('tipo')
+                ->get()
+                ->pluck('total', 'tipo');
 
-            // Obtener los últimos 5 movimientos con los datos del producto
-            $ultimosMovimientos = Movimiento::with('producto')
-                                            ->latest()
-                                            ->take(5)
-                                            ->get();
+            // Convertimos a minúsculas para evitar errores de escritura (Entrada vs entrada)
+            $entradasHoy = $movimientosStats->get('Entrada') ?? $movimientosStats->get('entrada') ?? 0;
+            $salidasHoy  = $movimientosStats->get('Salida') ?? $movimientosStats->get('salida') ?? 0;
+
+            // 3. Últimos 5 movimientos con relaciones cargadas para velocidad (Eager Loading)
+            $ultimosMovimientos = Movimiento::with(['producto', 'usuario'])
+                ->latest('created_at')
+                ->take(5)
+                ->get();
+
         } catch (\Exception $e) {
-            // Si algo falla con movimientos, devolvemos valores por defecto
+            \Log::error("Error Dashboard: " . $e->getMessage());
             $entradasHoy = 0;
             $salidasHoy = 0;
-            $ultimosMovimientos = collect(); 
+            $ultimosMovimientos = collect();
         }
 
         return view('inicio', compact(
