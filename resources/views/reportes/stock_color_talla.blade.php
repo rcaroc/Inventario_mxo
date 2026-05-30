@@ -2,9 +2,13 @@
 
 @section('css')
 <style>
-    .btn-export-excel { background-color: #48c78e !important; color: white !important; border: none !important; padding: 8px 20px; }
-    .btn-export-pdf { background-color: #5c6bc0 !important; color: white !important; border: none !important; padding: 8px 20px; }
-    .btn-export-excel:hover, .btn-export-pdf:hover { opacity: 0.9; color: white !important; }
+    /* Ocultar botones originales de DataTables (los plomos) */
+    .dt-buttons {
+        display: none !important;
+    }
+    
+    .btn-export-excel { background-color: #48c78e !important; color: white !important; border: none !important; }
+    .btn-export-pdf { background-color: #5dade2 !important; color: white !important; border: none !important; }
     .form-label { font-size: 0.85rem; margin-bottom: 4px; }
 </style>
 @endsection
@@ -28,7 +32,6 @@
                         @endforeach
                     </select>
                 </div>
-
                 <div class="col-md-4">
                     <label class="form-label fw-bold text-muted">Color (contiene)</label>
                     <select id="filtro-color" class="form-select">
@@ -38,7 +41,6 @@
                         @endforeach
                     </select>
                 </div>
-
                 <div class="col-md-4">
                     <label class="form-label fw-bold text-muted">Talla (exacta)</label>
                     <select id="filtro-talla" class="form-select">
@@ -50,17 +52,17 @@
                 </div>
             </div>
 
-        <div class="mt-4 d-flex align-items-center">
-            <button id="btn-aplicar" class="btn btn-primary px-4 me-2 shadow-sm">Aplicar</button>
-            <button id="btn-limpiar" class="btn btn-light px-4 border me-auto">Limpiar</button>
-            
-            <button id="btn-export-excel-manual" class="btn btn-success me-2 shadow-sm" style="background-color: #48c78e; border:none;">
-                <i class="fas fa-file-excel me-1"></i> Exportar Excel
-            </button>
-            <button id="btn-export-pdf-manual" class="btn btn-primary shadow-sm" style="background-color: #5dade2; border:none;">
-                <i class="fas fa-file-pdf me-1"></i> Exportar PDF
-            </button>
-        </div>
+            <div class="mt-4 d-flex align-items-center">
+                <button id="btn-aplicar" class="btn btn-primary px-4 me-2 shadow-sm">Aplicar</button>
+                <button id="btn-limpiar" class="btn btn-light px-4 border me-auto">Limpiar</button>
+                
+                <button id="btn-excel-custom" class="btn btn-export-excel px-3 me-2 shadow-sm text-white">
+                    <i class="fas fa-file-excel me-1"></i> Exportar Excel
+                </button>
+                <button id="btn-pdf-custom" class="btn btn-export-pdf px-3 shadow-sm text-white">
+                    <i class="fas fa-file-pdf me-1"></i> Exportar PDF
+                </button>
+            </div>
         </div>
     </div>
 
@@ -79,11 +81,11 @@
                     <tbody>
                         @foreach($reporte as $prod)
                         <tr>
-                            <td class="fw-bold text-dark">{{ $prod->modelo->modelo_nombre ?? '---' }}</td>
+                            <td class="fw-bold">{{ $prod->modelo->modelo_nombre ?? '---' }}</td>
                             <td class="text-muted">{{ $prod->producto_color }}</td>
                             <td class="text-center">{{ $prod->producto_talla }}</td>
                             <td class="text-center fw-bold">
-                                <span class="{{ ($prod->stock->cantidad ?? 0) <= 0 ? 'text-danger' : 'text-dark' }}">
+                                <span class="{{ ($prod->stock->cantidad ?? 0) <= 0 ? 'text-danger' : '' }}">
                                     {{ $prod->stock->cantidad ?? 0 }}
                                 </span>
                             </td>
@@ -106,7 +108,7 @@
 @section('js')
 <script>
 $(document).ready(function() {
-    // Forzar registro de fuentes para PDFMake
+    // Registrar fuentes para PDF antes de iniciar
     if (window.pdfMake) {
         pdfMake.vfs = pdfMake.vfs;
     }
@@ -125,34 +127,44 @@ $(document).ready(function() {
                 extend: 'pdfHtml5', 
                 footer: true,
                 title: 'Reporte Stock por Color y Talla',
-                orientation: 'portrait',
-                pageSize: 'A4',
-                // Si se queda cargando, probamos sin el customize primero o simplificado
                 customize: function(doc) {
-                    doc.content[1].table.widths = ['*', '*', '*', '*'];
+                    // Limpia el texto repetido del footer en el PDF
+                    var footerRow = doc.content[1].table.footer[0];
+                    if (footerRow) {
+                        footerRow[1].text = ''; // Columna Color
+                        footerRow[2].text = ''; // Columna Talla
+                    }
                 }
             }
-        ]
+        ],
+        "footerCallback": function (row, data, start, end, display) {
+            var api = this.api();
+            var intVal = function (i) {
+                if (typeof i === 'string') {
+                    let cleaned = i.replace(/<[^>]*>?/gm, '').trim();
+                    return cleaned === '' ? 0 : parseFloat(cleaned);
+                }
+                return typeof i === 'number' ? i : 0;
+            };
+
+            total = api.column(3, { filter: 'applied' }).data().reduce(function (a, b) {
+                return intVal(a) + intVal(b);
+            }, 0);
+
+            $(api.column(3).footer()).html(total);
+        }
     });
 
-    // Ocultamos los botones automáticos de Datatables
-    table.buttons().container().hide();
-
-    // Vinculación de tus botones manuales (Asegúrate que los IDs coincidan)
-    $('#btn-export-excel-manual').on('click', function(e) {
-        e.preventDefault();
+    // Acción de botones personalizados
+    $('#btn-excel-custom').on('click', function() {
         table.button(0).trigger();
     });
 
-    $('#btn-export-pdf-manual').on('click', function(e) {
-        e.preventDefault();
-        // Usamos una pequeña pausa para asegurar que no bloquee el hilo del navegador
-        setTimeout(function(){
-            table.button(1).trigger();
-        }, 100);
+    $('#btn-pdf-custom').on('click', function() {
+        table.button(1).trigger();
     });
 
-    // Lógica de Filtros Aplicar / Limpiar
+    // Filtros
     $('#btn-aplicar').on('click', function() {
         table.column(0).search($('#filtro-modelo').val());
         let color = $('#filtro-color').val();
