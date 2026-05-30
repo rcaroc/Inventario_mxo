@@ -31,30 +31,25 @@ class UsuarioController extends Controller
      */
 public function store(Request $request)
 {
-    // 1. Validar permisos (Usamos strtolower para evitar problemas de mayúsculas)
-    if (strtolower(auth()->user()->rol) !== 'administrador') {
-        return redirect()->back()->with('error', 'No tienes permiso para crear usuarios.');
-    }
-
-    // 2. Validación (Los keys de aquí deben ser los 'name' de tu HTML)
+    // 1. Validación (Ajustada a los values de tu HTML y nombres de campos)
     $request->validate([
-        'usuario_nombre'   => 'required',
-        'usuario_apellido' => 'required',
-        'usuario_usuario'  => 'required|unique:usuario,usuario_usuario', // Nombre de login
-        'usuario_clave'    => 'required|min:6', // La clave
-        'rol'              => 'required|in:Encargado de Inventario,Encargado de Ventas',
+        'usuario_nombre'   => 'required|max:40',
+        'usuario_apellido' => 'required|max:40',
+        'usuario_usuario'  => 'required|unique:usuario,usuario_usuario|max:20',
+        'usuario_clave'    => 'required|min:6|confirmed', // 'confirmed' busca usuario_clave_confirmation
+        'rol'              => 'required', 
     ]);
 
-    // 3. Crear el usuario con los nombres de tu $fillable
+    // 2. Crear el usuario
     Usuario::create([
         'usuario_nombre'   => $request->usuario_nombre,
         'usuario_apellido' => $request->usuario_apellido,
-        'usuario_usuario'  => $request->usuario_usuario, // <--- Este faltaba
-        'usuario_clave'    => bcrypt($request->usuario_clave), // <--- Usamos usuario_clave
-        'rol'              => $request->rol,
+        'usuario_usuario'  => $request->usuario_usuario,
+        'usuario_clave'    => bcrypt($request->usuario_clave), // Encriptamos la clave
+        'rol'              => $request->rol, // Guardará "inventario" o "ventas" según tu HTML
     ]);
 
-    return redirect()->route('usuarios.index')->with('success', 'Usuario creado correctamente.');
+    return redirect()->route('usuarios.index')->with('success', '¡Usuario creado con éxito!');
 }
     /**
      * 4. MOSTRAR FORMULARIO DE EDICIÓN (edit)
