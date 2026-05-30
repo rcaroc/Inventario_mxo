@@ -33,13 +33,13 @@
             </div>
         </div>
 
-        {{-- Tarjeta 3: Entradas Hoy --}}
+        {{-- Tarjeta 3: Entradas --}}
         <div class="col-md-3 mb-4">
             <div class="card bg-success text-white shadow-sm border-0 h-100">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="text-uppercase mb-1" style="font-size: 0.8rem; opacity: 0.8;">Entradas Hoy</h6>
+                            <h6 class="text-uppercase mb-1" style="font-size: 0.8rem; opacity: 0.8;">Entradas</h6>
                             <h2 class="mb-0 fw-bold">{{ $entradasHoy }}</h2>
                         </div>
                         <i class="fas fa-arrow-down fa-2x" style="opacity: 0.3;"></i>
@@ -48,13 +48,13 @@
             </div>
         </div>
 
-        {{-- Tarjeta 4: Salidas Hoy --}}
+        {{-- Tarjeta 4: Salidas --}}
         <div class="col-md-3 mb-4">
             <div class="card bg-info text-white shadow-sm border-0 h-100">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="text-uppercase mb-1" style="font-size: 0.8rem; opacity: 0.8;">Salidas Hoy</h6>
+                            <h6 class="text-uppercase mb-1" style="font-size: 0.8rem; opacity: 0.8;">Salidas</h6>
                             <h2 class="mb-0 fw-bold">{{ $salidasHoy }}</h2>
                         </div>
                         <i class="fas fa-arrow-up fa-2x" style="opacity: 0.3;"></i>
@@ -86,21 +86,24 @@
                             <tbody>
                                 @forelse($ultimosMovimientos as $mov)
                                 <tr>
+                                    {{-- Ajustado a producto_nombre --}}
                                     <td class="fw-bold">{{ $mov->producto->producto_nombre ?? 'N/A' }}</td>
                                     <td>
-                                        <span class="badge {{ $mov->movimiento_tipo == 'Entrada' ? 'bg-success' : 'bg-danger' }}">
-                                            {{ $mov->movimiento_tipo }}
+                                        {{-- Ajustado a 'tipo' según tu modelo --}}
+                                        <span class="badge {{ strtolower($mov->tipo) == 'entrada' ? 'bg-success' : 'bg-danger' }}">
+                                            {{ $mov->tipo }}
                                         </span>
                                     </td>
-                                    <td class="fw-bold {{ $mov->movimiento_tipo == 'Entrada' ? 'text-success' : 'text-danger' }}">
-                                        {{ $mov->movimiento_tipo == 'Entrada' ? '+' : '-' }}{{ $mov->movimiento_cantidad }}
+                                    {{-- Ajustado a 'cantidad' según tu modelo --}}
+                                    <td class="fw-bold {{ strtolower($mov->tipo) == 'entrada' ? 'text-success' : 'text-danger' }}">
+                                        {{ strtolower($mov->tipo) == 'entrada' ? '+' : '-' }}{{ $mov->cantidad }}
                                     </td>
                                     <td>{{ $mov->usuario->usuario_nombre ?? 'Sistema' }}</td>
                                     <td class="text-muted small">{{ $mov->created_at->format('d/m/Y H:i') }}</td>
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="5" class="text-center text-muted py-4">No hay movimientos registrados hoy.</td>
+                                    <td colspan="5" class="text-center text-muted py-4">No se encontraron movimientos registrados.</td>
                                 </tr>
                                 @endforelse
                             </tbody>
@@ -114,7 +117,6 @@
         <div class="col-md-4">
             <div class="card shadow-sm border-0 text-center p-3 h-100">
                 <div class="card-body d-flex flex-column justify-content-center align-items-center">
-                    {{-- Generamos un avatar automático con las iniciales --}}
                     <img src="https://ui-avatars.com/api/?name={{ Auth::user()->usuario_nombre }}+{{ Auth::user()->usuario_apellido }}&background=0d6efd&color=fff&size=128" 
                          class="rounded-circle mb-3 shadow-sm" width="100">
                     
