@@ -179,7 +179,7 @@ $(document).ready(function() {
         table.button(1).trigger();
     });
 
-    // Agregarlos al div vacío que tienes arriba
+    // Agregardlos al div vacío que tienes arriba
     $('#wrapper-botones').empty().append(btnExcel).append(btnPdf);
 });
 </script>
