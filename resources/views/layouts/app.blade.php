@@ -7,14 +7,18 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    {{-- 1. PUNTO DE ANCLAJE PARA CSS ESPECÍFICO --}}
+    @yield('css')
+
     <style>
         body { background-color: #f4f6f9; }
         .navbar-dark { background-color: #1a1d20 !important; }
         .dropdown-menu { border: none; box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15); }
 
-        /* --- ESTILOS DE BOTONES PERSONALIZADOS (ESTILO IMAGEN) --- */
+        /* Estilos de botones personalizados */
         .btn-editar-custom {
-            background-color: #5c6bc0 !important; /* Azul/Violeta */
+            background-color: #5c6bc0 !important;
             color: white !important;
             padding: 7px 18px;
             border-radius: 4px;
@@ -27,7 +31,7 @@
         }
 
         .btn-eliminar-custom {
-            background-color: #ef5350 !important; /* Rojo/Rosado */
+            background-color: #ef5350 !important;
             color: white !important;
             padding: 7px 18px;
             border-radius: 4px;
@@ -41,7 +45,6 @@
         .btn-editar-custom:hover { background-color: #3f51b5 !important; }
         .btn-eliminar-custom:hover { background-color: #e53935 !important; }
         
-        /* Botón Guardar tipo cápsula */
         .btn-guardar-custom {
             background-color: #3498db !important;
             color: white !important;
@@ -51,33 +54,10 @@
             font-weight: 500;
         }
 
-        /* Estilos para las etiquetas de Rol */
-        .badge-admin {
-            background-color: #ef5350 !important; /* Rojo/Rosa */
-            color: white !important;
-            padding: 5px 12px;
-            border-radius: 4px;
-            font-size: 0.85rem;
-            font-weight: 500;
-        }
-
-        .badge-ventas {
-            background-color: #48c78e !important; /* Verde */
-            color: white !important;
-            padding: 5px 12px;
-            border-radius: 4px;
-            font-size: 0.85rem;
-            font-weight: 500;
-        }
-
-        .badge-inventario {
-            background-color: #ffd54f !important; /* Amarillo/Naranja claro */
-            color: #5d4037 !important; /* Texto oscuro para contraste */
-            padding: 5px 12px;
-            border-radius: 4px;
-            font-size: 0.85rem;
-            font-weight: 500;
-        }
+        /* Badges de Roles */
+        .badge-admin { background-color: #ef5350 !important; color: white !important; padding: 5px 12px; border-radius: 4px; font-size: 0.85rem; font-weight: 500; }
+        .badge-ventas { background-color: #48c78e !important; color: white !important; padding: 5px 12px; border-radius: 4px; font-size: 0.85rem; font-weight: 500; }
+        .badge-inventario { background-color: #ffd54f !important; color: #5d4037 !important; padding: 5px 12px; border-radius: 4px; font-size: 0.85rem; font-weight: 500; }
     </style>
 </head>
 <body>
@@ -97,9 +77,7 @@
                     </li>
 
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            Usuario
-                        </a>
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Usuario</a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{{ route('usuarios.index') }}">Lista de Usuarios</a></li>
                             <li><a class="dropdown-item" href="{{ route('usuarios.create') }}">Crear Usuario</a></li>
@@ -107,9 +85,7 @@
                     </li>
 
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            Catálogo
-                        </a>
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Catálogo</a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{{ route('modelos.index') }}">Lista de Modelos</a></li>
                             <li><a class="dropdown-item" href="{{ route('modelos.create') }}">Nuevo Modelo</a></li>
@@ -120,9 +96,7 @@
                     </li>
 
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            Movimiento
-                        </a>
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Movimiento</a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{{ route('movimientos.entrada') }}">Registro Entrada</a></li>
                             <li><a class="dropdown-item" href="{{ route('movimientos.salida') }}">Registro Salida</a></li>
@@ -132,9 +106,7 @@
                     </li>
 
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            Reporte
-                        </a>
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Reporte</a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{{ route('reportes.modelo') }}">Stock por modelo</a></li>
                             <li><a class="dropdown-item" href="{{ route('reportes.talla') }}">Stock por talla y color</a></li>
@@ -144,7 +116,6 @@
 
                 <div class="d-flex align-items-center text-white">
                     <span class="badge bg-primary me-2"><i class="fas fa-user"></i> Administrador</span>
-                    <span class="badge bg-danger me-3"><i class="fas fa-shield-alt"></i> Administrador</span>
                     <form action="{{ route('logout') }}" method="POST">
                         @csrf
                         <button type="submit" class="btn btn-sm btn-light">Salir</button>
@@ -159,5 +130,9 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    {{-- 2. PUNTO DE ANCLAJE PARA SCRIPTS (jQuery, DataTables, etc.) --}}
+    @yield('js')
+
 </body>
 </html>
