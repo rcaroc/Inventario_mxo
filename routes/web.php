@@ -28,9 +28,7 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 Route::middleware(['auth'])->group(function () {
 
     // --- INICIO / DASHBOARD ---
-    Route::get('/home', function () { 
-        return view('inicio'); 
-    })->name('home');
+Route::get('/home', [App\Http\Controllers\DashboardController::class, 'index'])->name('home');
 
     // --- USUARIOS ---
     Route::prefix('usuarios')->group(function () {
