@@ -11,7 +11,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // REGISTRAMOS EL ALIAS AQUÍ
+        
+        // 1. ESTA LÍNEA ES LA QUE QUITA EL AVISO DE "PELIGROSO"
+        // Le dice a Laravel que confíe en el certificado SSL de Render
+        $middleware->trustProxies(at: '*');
+
+        // 2. TUS ALIAS YA EXISTENTES
         $middleware->alias([
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
         ]);
