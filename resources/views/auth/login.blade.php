@@ -95,7 +95,7 @@
                        name="name" 
                        id="name" 
                        class="form-control @error('name') is-invalid @enderror" 
-                       placeholder="Administrador" 
+                       placeholder="Ingresar usuario" 
                        value="{{ old('name') }}" 
                        required 
                        autofocus>
