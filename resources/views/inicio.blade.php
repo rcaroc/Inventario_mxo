@@ -1,48 +1,113 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="row justify-content-center">
-    <div class="col-md-10">
-        <div class="card shadow-sm border-0 mb-4">
-            <div class="card-body p-4">
-                <h2 class="h4 mb-4"><i class="fas fa-tachometer-alt me-2"></i> Dashboard</h2>
-
-                {{-- Lógica para definir el color del badge según el rol --}}
-                @php
-                    $badgeClass = 'bg-success'; // Color para Ventas (Verde)
-                    if(Auth::user()->rol == 'administrador') $badgeClass = 'bg-danger'; // Rojo
-                    if(Auth::user()->rol == 'inventario') $badgeClass = 'bg-warning text-dark'; // Amarillo
-                @endphp
-
-                <div class="alert alert-info border-0 shadow-sm" style="background-color: #e7f3ff; border-left: 4px solid #0d6efd !important;">
-                    {{-- Nombre dinámico --}}
-                    <div class="mb-2">
-                        <i class="fas fa-user"></i> 
-                        <strong>Bienvenido:</strong> {{ Auth::user()->usuario_nombre }} {{ Auth::user()->usuario_apellido }}
+<div class="container-fluid">
+    <div class="row">
+        {{-- Tarjeta 1: Total Productos --}}
+        <div class="col-md-3 mb-4">
+            <div class="card bg-primary text-white shadow-sm border-0">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase mb-1">Productos</h6>
+                            <h2 class="mb-0">125</h2> {{-- Aquí irá un count() de tu BD --}}
+                        </div>
+                        <i class="fas fa-boxes fa-2x opacity-50"></i>
                     </div>
-                    
-                    {{-- Rol dinámico --}}
-                    <div>
-                        <i class="fas fa-tag"></i> 
-                        <strong>Rol:</strong> 
-                        <span class="badge {{ $badgeClass }} ms-1">
-                            {{ ucfirst(Auth::user()->rol) }}
-                        </span>
-                    </div>
-                </div>
-
-                <div class="mt-4">
-                    <form action="{{ route('logout') }}" method="POST" class="d-inline">
-                        @csrf
-                        <button class="btn btn-danger me-2"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
-                    </form>
-                    <a href="{{ route('home') }}" class="btn btn-light border">Inicio</a>
                 </div>
             </div>
         </div>
 
-        <div class="text-center mt-5">
-            <h1 class="display-3 fw-bold">Sistema de Inventario <img src="https://em-content.zobj.net/source/microsoft-teams/337/rocket_1f680.png" width="60"></h1>
+        {{-- Tarjeta 2: Stock Crítico --}}
+        <div class="col-md-3 mb-4">
+            <div class="card bg-danger text-white shadow-sm border-0">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase mb-1">Stock Bajo</h6>
+                            <h2 class="mb-0">8</h2> {{-- Productos con stock < 5 --}}
+                        </div>
+                        <i class="fas fa-exclamation-triangle fa-2x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Tarjeta 3: Entradas Hoy --}}
+        <div class="col-md-3 mb-4">
+            <div class="card bg-success text-white shadow-sm border-0">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase mb-1">Entradas Hoy</h6>
+                            <h2 class="mb-0">15</h2>
+                        </div>
+                        <i class="fas fa-arrow-down fa-2x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Tarjeta 4: Salidas Hoy --}}
+        <div class="col-md-3 mb-4">
+            <div class="card bg-info text-white shadow-sm border-0">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase mb-1">Salidas Hoy</h6>
+                            <h2 class="mb-0">4</h2>
+                        </div>
+                        <i class="fas fa-arrow-up fa-2x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-2">
+        {{-- Actividad Reciente --}}
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white fw-bold">
+                    <i class="fas fa-history me-2"></i> Últimos Movimientos
+                </div>
+                <div class="card-body">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Tipo</th>
+                                <th>Cant.</th>
+                                <th>Usuario</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{-- Aquí harías un @foreach de tus movimientos --}}
+                            <tr>
+                                <td>Polo Oversize M</td>
+                                <td><span class="badge bg-success">Entrada</span></td>
+                                <td>+20</td>
+                                <td>Rosabel Caro</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        {{-- Perfil rápido --}}
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 text-center p-3">
+                <div class="card-body">
+                    <img src="https://ui-avatars.com/api/?name={{ Auth::user()->usuario_nombre }}+{{ Auth::user()->usuario_apellido }}&background=0D8ABC&color=fff" class="rounded-circle mb-3" width="80">
+                    <h5>{{ Auth::user()->usuario_nombre }}</h5>
+                    <p class="text-muted">{{ ucfirst(Auth::user()->rol) }}</p>
+                    <hr>
+                    <div class="d-grid">
+                        <a href="{{ route('usuarios.index') }}" class="btn btn-outline-primary btn-sm">Ver mi perfil</a>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
