@@ -1,32 +1,18 @@
 @extends('layouts.app')
 
-@section('css')
-{{-- CSS de DataTables --}}
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
-<style>
-    .btn-export-pdf { background-color: #5dade2; color: white; border-radius: 4px; border: none; padding: 7px 18px; font-size: 14px; font-weight: 500; }
-    .btn-export-excel { background-color: #48c78e; color: white; border-radius: 4px; border: none; padding: 7px 18px; font-size: 14px; font-weight: 500; }
-    .btn-export-pdf:hover { background-color: #3498db; color: white; }
-    .btn-export-excel:hover { background-color: #3ead76; color: white; }
-    .total-fila { background-color: #f8f9fa; font-weight: bold; }
-</style>
-@endsection
-
 @section('content')
 <div class="container mt-4">
     <div class="mb-4">
         <h1 class="fw-bold text-dark mb-0">Reporte de Stock por Modelo</h1>
     </div>
 
-    <div class="mb-4">
-        <button class="btn-export-pdf me-2 shadow-sm"><i class="fas fa-file-pdf me-1"></i> Exportar PDF</button>
-        <button class="btn-export-excel shadow-sm"><i class="fas fa-file-excel me-1"></i> Exportar Excel</button>
-    </div>
+    {{-- Contenedor donde aparecerán los botones de exportación --}}
+    <div id="contenedor-botones" class="mb-3"></div>
 
     <div class="card shadow-sm border-0" style="border-radius: 12px;">
         <div class="card-body p-4">
             <div class="table-responsive">
-                <table id="tabla-stock-modelo" class="table table-hover align-middle">
+                <table id="tabla-stock-modelo" class="table table-hover align-middle w-100">
                     <thead class="table-light">
                         <tr>
                             <th>Modelo</th>
@@ -38,23 +24,17 @@
                     <tbody>
                         @foreach($reporte as $item)
                         <tr>
-                            <td class="fw-bold text-dark">{{ $item->modelo_nombre }}</td>
-                            <td class="text-muted">{{ $item->modelo_ubicacion ?? 'Sin ubicación' }}</td>
+                            <td class="fw-bold">{{ $item->modelo_nombre }}</td>
+                            <td class="text-muted">{{ $item->modelo_ubicacion ?? '---' }}</td>
                             <td class="text-center">{{ $item->productos_count }}</td>
                             <td class="text-center fw-bold">
-                                <span class="{{ ($item->stock_total ?? 0) <= 0 ? 'text-danger' : 'text-dark' }}">
+                                <span class="{{ ($item->stock_total ?? 0) <= 0 ? 'text-danger' : '' }}">
                                     {{ $item->stock_total ?? 0 }}
                                 </span>
                             </td>
                         </tr>
                         @endforeach
                     </tbody>
-                    <tfoot>
-                        <tr class="total-fila">
-                            <td colspan="3" class="text-end py-3">Total general</td>
-                            <td class="text-center py-3 fs-5 text-primary">{{ $totalGeneral }}</td>
-                        </tr>
-                    </tfoot>
                 </table>
             </div>
         </div>
@@ -63,21 +43,32 @@
 @endsection
 
 @section('js')
-{{-- JS de DataTables --}}
-<script src="https://code.jquery.com/jquery-3.7.0.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
-
 <script>
-    $(document).ready(function() {
-        $('#tabla-stock-modelo').DataTable({
-            "order": [[ 0, "asc" ]], // Ordenar por nombre de modelo por defecto
-            "language": {
-                "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json"
+$(document).ready(function() {
+    var table = $('#tabla-stock-modelo').DataTable({
+        "order": [[ 3, "desc" ]],
+        "language": {
+            "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json"
+        },
+        "dom": '<"d-flex justify-content-between"f>rt<"d-flex justify-content-between"ip>', 
+        "buttons": [
+            {
+                extend: 'excelHtml5',
+                text: '<i class="fas fa-file-excel me-1"></i> Exportar Excel',
+                className: 'btn-export-excel shadow-sm me-2',
+                title: 'Reporte Stock por Modelo'
             },
-            "pageLength": 10,
-            "dom": '<"d-flex justify-content-between align-items-center mb-3"lf>rtip'
-        });
+            {
+                extend: 'pdfHtml5',
+                text: '<i class="fas fa-file-pdf me-1"></i> Exportar PDF',
+                className: 'btn-export-pdf shadow-sm',
+                title: 'Reporte Stock por Modelo'
+            }
+        ]
     });
+
+    // Inyectamos los botones en el div que creamos arriba
+    table.buttons().container().appendTo('#contenedor-botones');
+});
 </script>
 @endsection
