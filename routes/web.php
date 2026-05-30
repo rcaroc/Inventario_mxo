@@ -32,13 +32,8 @@ Route::middleware(['auth'])->group(function () {
 Route::get('/home', [App\Http\Controllers\DashboardController::class, 'index'])->name('home');
 
 // --- USUARIOS (SOLO ADMINISTRADOR) ---
-    Route::middleware(function ($request, $next) {
-        // Verificamos si el usuario logueado es Administrador (ajusta el nombre exacto si es necesario)
-        if (auth()->user()->rol !== 'Administrador') {
-            return redirect('/home')->with('error', 'No tienes permiso para gestionar usuarios.');
-        }
-        return $next($request);
-    })->prefix('usuarios')->group(function () {
+    // Usamos un nombre de middleware en lugar de una función directa
+    Route::middleware(['auth', 'admin'])->prefix('usuarios')->group(function () {
         Route::get('/lista', [UsuarioController::class, 'index'])->name('usuarios.index');
         Route::get('/crear', [UsuarioController::class, 'create'])->name('usuarios.create');
         Route::post('/guardar', [UsuarioController::class, 'store'])->name('usuarios.store');
