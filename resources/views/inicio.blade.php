@@ -4,33 +4,50 @@
 <div class="container-fluid">
     {{-- Encabezado del Panel --}}
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3 class="fw-bold text-dark mb-0">Panel de Control</h3>
+        <h3 class="fw-bold text-dark mb-0">Panel de Control Gerencial</h3>
     </div>
 
-    {{-- Fila de Tarjetas de Estadísticas --}}
-    <div class="row">
-        {{-- Tarjeta 1: Total Productos --}}
-        <div class="col-md-3 mb-4">
-            <div class="card bg-primary text-white shadow-sm border-0 h-100">
+    {{-- FILA 1: TARJETAS DE MÉTRICAS DE NEGOCIO Y FINANZAS (2026) --}}
+    <div class="row mb-4">
+        {{-- Tarjeta 1: Ventas 2026 en Soles --}}
+        <div class="col-md-3 mb-3">
+            <div class="card bg-success text-white shadow-sm border-0 h-100">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="text-uppercase mb-1" style="font-size: 0.75rem; opacity: 0.8;">Total Productos</h6>
-                            <h2 class="mb-0 fw-bold">{{ $totalProductos }}</h2>
+                            <h6 class="text-uppercase mb-1" style="font-size: 0.75rem; opacity: 0.9;">Ventas Totales 2026</h6>
+                            <h2 class="mb-0 fw-bold">S/ {{ number_format($ventas2026, 2, '.', ',') }}</h2>
                         </div>
-                        <i class="fas fa-boxes fa-2x" style="opacity: 0.3;"></i>
+                        <i class="fas fa-coins fa-2x" style="opacity: 0.3;"></i>
                     </div>
                 </div>
             </div>
         </div>
 
-        {{-- Tarjeta 2: Stock Crítico --}}
-        <div class="col-md-3 mb-4">
+        {{-- Tarjeta 2: Comparativa vs 2025 --}}
+        <div class="col-md-3 mb-3">
+            <div class="card {{ $crecimientoAumento >= 0 ? 'bg-primary' : 'bg-warning' }} text-white shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase mb-1" style="font-size: 0.75rem; opacity: 0.9;">Variación vs 2025</h6>
+                            <h2 class="mb-0 fw-bold">
+                                {{ $crecimientoAumento >= 0 ? '+' : '' }}{{ number_format($crecimientoAumento, 1) }}%
+                            </h2>
+                        </div>
+                        <i class="fas {{ $crecimientoAumento >= 0 ? 'fa-chart-line' : 'fa-chart-line-down' }} fa-2x" style="opacity: 0.3;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Tarjeta 3: Stock Crítico --}}
+        <div class="col-md-3 mb-3">
             <div class="card bg-danger text-white shadow-sm border-0 h-100">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="text-uppercase mb-1" style="font-size: 0.75rem; opacity: 0.8;">Stock Bajo</h6>
+                            <h6 class="text-uppercase mb-1" style="font-size: 0.75rem; opacity: 0.9;">Productos en Alerta</h6>
                             <h2 class="mb-0 fw-bold">{{ $stockBajo }}</h2>
                         </div>
                         <i class="fas fa-exclamation-triangle fa-2x" style="opacity: 0.3;"></i>
@@ -39,38 +56,25 @@
             </div>
         </div>
 
-        {{-- Tarjeta 3: Entradas --}}
-        <div class="col-md-3 mb-4">
-            <div class="card bg-success text-white shadow-sm border-0 h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-uppercase mb-1" style="font-size: 0.75rem; opacity: 0.8;">Entradas Totales</h6>
-                            <h2 class="mb-0 fw-bold">{{ $entradasHoy }}</h2>
-                        </div>
-                        <i class="fas fa-arrow-down fa-2x" style="opacity: 0.3;"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        {{-- Tarjeta 4: Salidas --}}
-        <div class="col-md-3 mb-4">
+        {{-- Tarjeta 4: Top Prenda Vendida --}}
+        <div class="col-md-3 mb-3">
             <div class="card bg-info text-white shadow-sm border-0 h-100">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="text-uppercase mb-1" style="font-size: 0.75rem; opacity: 0.8;">Salidas Totales</h6>
-                            <h2 class="mb-0 fw-bold">{{ $salidasHoy }}</h2>
+                            <h6 class="text-uppercase mb-1" style="font-size: 0.75rem; opacity: 0.9;">Top Ventas 2026</h6>
+                            <h6 class="mb-0 fw-bold text-truncate" style="max-width: 170px;" title="{{ $nombreTopProducto }}">
+                                {{ $nombreTopProducto }}
+                            </h6>
                         </div>
-                        <i class="fas fa-arrow-up fa-2x" style="opacity: 0.3;"></i>
+                        <i class="fas fa-crown fa-2x" style="opacity: 0.3;"></i>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    {{-- SECCIÓN DE PREDICCIÓN CON INTELIGENCIA ARTIFICIAL --}}
+    {{-- FILA 2: SECCIÓN DE PREDICCIÓN CON INTELIGENCIA ARTIFICIAL --}}
     <div class="row mb-4">
         <div class="col-12">
             <div class="card shadow-sm border-0 border-start border-4 border-primary">
@@ -87,8 +91,8 @@
                                 <label class="form-label fw-bold">Seleccionar Producto:</label>
                                 <select id="ia_producto_id" class="form-select">
                                     @foreach($productos as $prod)
-                                        <option value="{{ $prod->producto_id ?? $prod->id }}">
-                                            {{ $prod->producto_nombre ?? $prod->nombre }}
+                                        <option value="{{ $prod->producto_id }}">
+                                            {{ $prod->producto_nombre }}
                                         </option>
                                     @endforeach
                                 </select>
@@ -152,7 +156,7 @@
         </div>
     </div>
 
-    {{-- Fila de Tabla de Movimientos --}}
+    {{-- FILA 3: TABLA DE ÚLTIMOS MOVIMIENTOS REGISTRADOS --}}
     <div class="row mt-2">
         <div class="col-12">
             <div class="card shadow-sm border-0">
@@ -170,6 +174,7 @@
                                     <th>Producto</th>
                                     <th>Tipo</th>
                                     <th>Cantidad</th>
+                                    <th>Monto Total</th>
                                     <th>Usuario Responsable</th>
                                     <th>Fecha y Hora</th>
                                 </tr>
@@ -186,6 +191,9 @@
                                     <td class="fw-bold {{ strtolower($mov->tipo) == 'entrada' ? 'text-success' : 'text-danger' }}">
                                         {{ strtolower($mov->tipo) == 'entrada' ? '+' : '-' }} {{ $mov->cantidad }}
                                     </td>
+                                    <td class="fw-bold">
+                                        S/ {{ number_format($mov->precio_total, 2) }}
+                                    </td>
                                     <td>
                                         <i class="fas fa-user-circle me-1 text-muted"></i>
                                         {{ $mov->usuario->usuario_usuario ?? 'Sistema' }}
@@ -197,7 +205,7 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="5" class="text-center text-muted py-5">
+                                    <td colspan="6" class="text-center text-muted py-5">
                                         <i class="fas fa-folder-open fa-3x mb-3 d-block opacity-25"></i>
                                         No hay movimientos registrados en el sistema.
                                     </td>
@@ -212,7 +220,7 @@
     </div>
 </div>
 
-{{-- SCRIPT JS PARA CONSUMIR LA API DE RENDER --}}
+{{-- SCRIPT JS PARA CONSUMIR LA API EN RENDER --}}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const btn = document.getElementById('btn-predecir');
